@@ -3,10 +3,18 @@
 Edit: ex38_1_greet.py::greet
 """
 
+import re
+
 from ex38_1_greet import app
 from typer.testing import CliRunner
 
 runner = CliRunner()
+
+
+def plain(text):
+    """Typer's --help output may contain color codes (for example when
+    FORCE_COLOR is set, or on CI). Strip them so the checks see plain text."""
+    return re.sub(r"\x1b\[[0-9;]*m", "", text)
 
 
 def test_greets():
@@ -38,5 +46,5 @@ def test_times_must_be_a_number():
 def test_help_lists_the_options():
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
-    assert "--shout" in result.output
-    assert "--times" in result.output
+    assert "--shout" in plain(result.output)
+    assert "--times" in plain(result.output)

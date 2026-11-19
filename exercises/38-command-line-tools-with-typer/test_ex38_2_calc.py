@@ -3,10 +3,18 @@
 Edit: ex38_2_calc.py::add
 """
 
+import re
+
 from ex38_2_calc import app
 from typer.testing import CliRunner
 
 runner = CliRunner()
+
+
+def plain(text):
+    """Typer's --help output may contain color codes (for example when
+    FORCE_COLOR is set, or on CI). Strip them so the checks see plain text."""
+    return re.sub(r"\x1b\[[0-9;]*m", "", text)
 
 
 def run(*args):
@@ -43,5 +51,5 @@ def test_the_command_name_is_required():
 def test_help_lists_both_commands():
     result = run("--help")
     assert result.exit_code == 0
-    assert "add" in result.output
-    assert "divide" in result.output
+    assert "add" in plain(result.output)
+    assert "divide" in plain(result.output)
