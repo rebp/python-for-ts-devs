@@ -1,0 +1,34 @@
+# Checks that a fresh clone works on Linux, macOS and Windows:
+# install with uv, then check that every exercise fails on its stub and passes
+# on its reference solution.
+name: Course checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    name: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install Python and dependencies (exactly as in uv.lock)
+        run: uv sync --locked
+
+      - name: Every exercise fails on its stub and passes on its solution
+        run: uv run course.py --verify
+
+      - name: All tests against the reference solutions
+        run: uv run pytest --solutions -q
+
+      - name: Lint
+        run: uv run ruff check .

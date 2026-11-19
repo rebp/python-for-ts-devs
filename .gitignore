@@ -1,0 +1,14 @@
+# Your personal progress
+progress.json
+
+# Python and tooling caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Files the exercises create when you run them
+*.db
+scratch/
