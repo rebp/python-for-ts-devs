@@ -28,4 +28,4 @@ dev = [
 testpaths = ["exercises"]
 
 [tool.ruff]
-extend-exclude = ["python-for-ts-devs.html", "*.md"]
+extend-exclude = ["index.html", "*.md"]

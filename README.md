@@ -57,9 +57,9 @@ Then open a new terminal so the `uv` command is found. Homebrew
    uv sync
    ```
 
-3. Open `python-for-ts-devs.html` in your browser. Double-click it, or run
-   `open python-for-ts-devs.html` on macOS, `start python-for-ts-devs.html` on
-   Windows or `xdg-open python-for-ts-devs.html` on Linux.
+3. Open `index.html` in your browser. Double-click it, or run
+   `open index.html` on macOS, `start index.html` on Windows or
+   `xdg-open index.html` on Linux.
 
 4. Start the exercises:
 
@@ -140,7 +140,7 @@ conflict in that file. Keep your version. `progress.json` is never touched.
 
 ```text
 course.py                 the exercise runner
-python-for-ts-devs.html   the course itself
+index.html                the course itself
 exercises/
   03-functions/
     ex03_2_average.py         ← you edit this: a stub with the task as its docstring
