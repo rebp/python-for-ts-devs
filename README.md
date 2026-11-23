@@ -57,9 +57,12 @@ Then open a new terminal so the `uv` command is found. Homebrew
    uv sync
    ```
 
-3. Open `index.html` in your browser. Double-click it, or run
-   `open index.html` on macOS, `start index.html` on Windows or
-   `xdg-open index.html` on Linux.
+3. Open the [course website](https://rebp.github.io/python-for-ts-devs/) or
+   double-click `index.html` to read locally. Start from the curriculum or
+   use **Find a lesson** to search by topic or number. On smaller screens,
+   tap the menu icon to open **Lessons** and find the search box. Use the
+   sun or moon icon to switch themes. You can swipe sideways inside wide
+   diagrams and code examples.
 
 4. Start the exercises:
 
@@ -82,6 +85,9 @@ For each lesson:
 
 The lessons build on each other, so go in order the first time. Lesson 20
 explains uv properly; until then, `uv sync` and `uv run` are all you need.
+Use **Jump to practice** in a lesson to go straight to its exercises. The
+website remembers the last lesson you opened and your checkmarks in that
+browser. The exercise runner tracks its progress separately.
 
 ## How the exercises work
 

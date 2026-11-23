@@ -9,12 +9,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F3F5F8; --surface:#FFFFFF; --ink:#18202A; --muted:#5A6676; --line:#D8DEE6;
-  --ts:#2F6FBF; --ts-soft:#E5EDF8; --py:#C99A06; --py-ink:#7A5D00; --py-soft:#FBF2D3;
+  --bg:#F8F6EF; --surface:#FFFEFA; --ink:#202B26; --muted:#546159; --line:#DADDD2;
+  --accent:#245946; --accent-soft:#E3EFE6; --on-accent:#FFFFFF;
+  --ts:#285C9F; --ts-soft:#E6EFF9; --py:#C99A06; --py-ink:#735600; --py-soft:#FAEFCB;
   --ok:#2E7D4F; --ok-soft:#E2F1E7; --warn:#B4472B; --warn-soft:#FAE8E2;
-  --code-bg:#EEF1F5; --kw:#7A3DB0; --str:#2E7D4F; --num:#B4472B; --fn:#2F6FBF;
+  --code-bg:#F0F1EA; --kw:#7A3DB0; --str:#2E7D4F; --num:#B4472B; --fn:#285C9F;
   --serif:"Literata", Georgia, "Times New Roman", serif;
   --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --ui:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   color-scheme: light;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -22,18 +24,20 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#10151B; --surface:#171E27; --ink:#E4E9EF; --muted:#9AA6B4; --line:#2A3441;
+    --bg:#131B17; --surface:#1C2620; --ink:#EDF1E9; --muted:#ACBCB1; --line:#34473D;
+    --accent:#A0DCBC; --accent-soft:#213D30; --on-accent:#14271D;
     --ts:#78A9EA; --ts-soft:#18263A; --py:#F2C94C; --py-ink:#F2C94C; --py-soft:#2A2513;
     --ok:#62C58E; --ok-soft:#15291E; --warn:#F08C6E; --warn-soft:#2E1B15;
-    --code-bg:#121920; --kw:#C9A0F2; --str:#8AD3A8; --num:#F4A584; --fn:#8DB8F0;
+    --code-bg:#141F19; --kw:#C9A0F2; --str:#8AD3A8; --num:#F4A584; --fn:#8DB8F0;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#10151B; --surface:#171E27; --ink:#E4E9EF; --muted:#9AA6B4; --line:#2A3441;
+  --bg:#131B17; --surface:#1C2620; --ink:#EDF1E9; --muted:#ACBCB1; --line:#34473D;
+  --accent:#A0DCBC; --accent-soft:#213D30; --on-accent:#14271D;
   --ts:#78A9EA; --ts-soft:#18263A; --py:#F2C94C; --py-ink:#F2C94C; --py-soft:#2A2513;
   --ok:#62C58E; --ok-soft:#15291E; --warn:#F08C6E; --warn-soft:#2E1B15;
-  --code-bg:#121920; --kw:#C9A0F2; --str:#8AD3A8; --num:#F4A584; --fn:#8DB8F0;
+  --code-bg:#141F19; --kw:#C9A0F2; --str:#8AD3A8; --num:#F4A584; --fn:#8DB8F0;
   color-scheme: dark;
 }
 *,*::before,*::after{box-sizing:inherit}
@@ -41,68 +45,112 @@ html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.68;-webkit-text-size-adjust:100%}
 a{color:var(--ts)}
 :focus-visible{outline:2px solid var(--ts);outline-offset:2px;border-radius:4px}
+a,button,summary,.done{touch-action:manipulation;-webkit-tap-highlight-color:var(--ts-soft)}
+.skip-link{position:fixed;z-index:22;top:calc(env(safe-area-inset-top,0px) + 8px);left:max(12px,env(safe-area-inset-left,0px));padding:8px 12px;border-radius:6px;background:var(--surface)}
+.skip-link:not(:focus){clip-path:inset(50%)}
 code,pre{font-family:var(--mono)}
 p code,li code,td code,.task-text code,figcaption code,summary code{font-size:.86em;background:var(--code-bg);padding:.08em .35em;border-radius:4px}
 
 /* layout */
 .app{display:grid;grid-template-columns:290px minmax(0,1fr);min-height:100vh}
-.sidebar{position:sticky;top:env(safe-area-inset-top,0px);height:100vh;overflow-y:auto;border-right:1px solid var(--line);background:var(--surface);padding:22px 18px 40px}
-.brand{display:block;text-decoration:none;color:var(--ink);font-weight:700;font-size:19px;line-height:1.25;margin-bottom:14px}
-.brand small{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:2px}
-.progress{margin:0 0 18px}
-.progress-bar{height:6px;background:var(--code-bg);border-radius:6px;overflow:hidden}
-.progress-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--ts),var(--py));width:0;transition:width .3s}
-.progress p{margin:6px 0 0;font-size:14px;color:var(--muted)}
-.nav-section{margin:18px 0 6px;font-size:14px;font-weight:600;color:var(--muted)}
+.sidebar{position:sticky;top:env(safe-area-inset-top,0px);height:100vh;height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--surface)}
+.sidebar-content{display:flex;flex-direction:column;min-height:0;font:14px/1.45 var(--ui)}
+.drawer-head,.drawer-backdrop{display:none}
+.outline-tools{flex:none;padding:20px 16px 12px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:700;line-height:1.3}
+.brand:hover,.topbar .t:hover{color:var(--accent)}
+.brand-mark{display:grid;place-items:center;flex:none;width:38px;height:38px;border-radius:8px;background:var(--accent);color:var(--on-accent);font:600 13px var(--mono)}
+.brand small{display:block;font-weight:500;color:var(--muted);margin-top:2px}
+.outline-tools p{margin:0;color:var(--muted);font-size:13px}
+.progress{margin:16px 0}
+.progress-bar{display:block;appearance:none;width:100%;height:6px;margin-top:6px;accent-color:var(--accent);border:0;border-radius:6px;background:var(--code-bg);overflow:hidden}
+.progress-bar::-webkit-progress-bar{background:var(--code-bg)}
+.progress-bar::-webkit-progress-value{background:var(--accent);border-radius:6px}
+.progress-bar::-moz-progress-bar{background:var(--accent);border-radius:6px}
+.lesson-search label{display:block;margin-bottom:4px;font-weight:600}
+.search-field{display:flex;gap:6px}
+.search-field input{min-width:0;width:100%;min-height:40px;padding:7px 10px;border:1px solid var(--muted);border-radius:7px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px}
+.search-field input::placeholder{color:var(--muted)}
+.storage-note{max-width:900px;margin:0 auto 16px;color:var(--warn);font:14px/1.5 var(--ui)}
+.outline{overflow-y:auto;overscroll-behavior:contain;padding:8px 12px 24px}
+.outline-note{margin:6px 4px;color:var(--muted);font-size:13px}
+.nav-section + .nav-section{border-top:1px solid var(--line)}
+.nav-section summary{padding:9px 5px;color:var(--muted);font-weight:650;cursor:pointer}
+.nav-section summary:hover,.nav-section[open] summary{color:var(--ink)}
+.nav-section summary .num{margin-inline:4px 5px}
 .nav-list{list-style:none;margin:0;padding:0}
-.nav-list a{display:grid;grid-template-columns:28px 1fr 16px;gap:6px;align-items:baseline;padding:5px 8px;border-radius:6px;text-decoration:none;color:var(--ink);font-size:15px;line-height:1.35}
+.nav-list a{display:grid;grid-template-columns:24px minmax(0,1fr) 14px;gap:6px;align-items:baseline;padding:7px 8px;border-radius:6px;text-decoration:none;color:var(--ink);line-height:1.35;overflow-wrap:anywhere}
 .nav-list a:hover{background:var(--code-bg)}
-.nav-list a[aria-current="page"]{background:var(--py-soft);box-shadow:inset 3px 0 0 var(--py)}
-.nav-list .num{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.nav-list a[aria-current="page"]{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent);font-weight:650}
+.num{font-family:var(--mono);font-size:12px;color:var(--muted)}
 .nav-list .check{color:var(--ok);font-size:13px}
 .side-foot{margin-top:24px;padding-top:14px;border-top:1px solid var(--line)}
-.btn-quiet{font:inherit;font-size:14px;background:none;border:1px solid var(--line);color:var(--ink);padding:6px 12px;border-radius:6px;cursor:pointer}
+.btn-quiet{font:600 14px/1.4 var(--ui);background:none;border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:7px;cursor:pointer}
 .btn-quiet:hover{background:var(--code-bg)}
 
 .topbar{display:none}
 main{padding:44px 40px 90px;min-width:0}
-.wrap{max-width:900px;margin:0 auto}
+.wrap{max-width:900px;margin:0 auto;container-type:inline-size;overflow-wrap:anywhere}
+.wrap [tabindex="0"]:focus-visible{outline-offset:-3px}
 .prose{max-width:68ch}
 
 @media (max-width:880px){
-  .app{grid-template-columns:1fr}
-  .topbar{display:flex;position:sticky;top:env(safe-area-inset-top,0px);z-index:20;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+  .app{grid-template-columns:minmax(0,1fr)}
+  .topbar{display:flex;position:sticky;top:env(safe-area-inset-top,0px);z-index:20;align-items:center;justify-content:space-between;gap:8px;padding:6px 12px;padding-inline:max(12px,env(safe-area-inset-left,0px)) max(12px,env(safe-area-inset-right,0px));background:var(--surface);border-bottom:1px solid var(--line)}
   body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--surface)}
-  .topbar .t{font-weight:700;font-size:16px;text-decoration:none;color:var(--ink)}
-  .sidebar{position:fixed;z-index:30;inset:0 auto 0 0;width:min(86vw,320px);height:100%;transform:translateX(-102%);transition:transform .25s;padding-top:calc(env(safe-area-inset-top,0px) + 20px);box-shadow:0 0 0 100vmax transparent}
-  body.nav-open .sidebar{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)}
-  main{padding:26px 18px 70px}
+  .topbar .t{display:grid;align-items:center;min-height:44px;font:700 14px/1.2 var(--ui);text-align:center;text-decoration:none;color:var(--ink);overflow-wrap:anywhere}
+  .topbar .icon-btn{display:grid;place-items:center;flex:none;width:44px;height:44px;padding:0;border-color:transparent;border-radius:10px}
+  .topbar .icon-btn:active{background:var(--accent-soft)}
+  .topbar .icon-btn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+  .topbar .theme-sun,.topbar [data-dark] .theme-moon{display:none}
+  .topbar [data-dark] .theme-sun{display:block}
+  .sidebar{display:none;position:fixed;z-index:30;inset:0 auto 0 0;width:min(88%,320px);height:auto;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px)}
+  .sidebar-content{overscroll-behavior:contain}
+  .outline-tools{padding-top:10px}
+  .outline-tools .brand{min-height:44px}
+  .drawer-head{display:flex;flex:none;justify-content:space-between;align-items:center;gap:8px;padding:6px 16px;border-bottom:1px solid var(--line);font:600 15px var(--ui)}
+  .drawer-backdrop:not([hidden]){display:block;position:fixed;z-index:25;inset:0;background:rgba(0,0,0,.35);touch-action:none}
+  body.nav-open{overflow:hidden}
+  body.nav-open .sidebar{display:flex}
+  .btn-quiet,.search-field input,.nav-list a,.map li a,.done,.task summary{min-height:44px}
+  .nav-section summary{min-height:44px;padding-block:12px}
+  .nav-list a,.map li a{align-items:center}
+  .done{padding-block:6px}
+  .task summary{padding-block:10px}
+  main{padding:26px 18px 70px;padding-inline:max(clamp(12px,4vw,18px),env(safe-area-inset-left,0px)) max(clamp(12px,4vw,18px),env(safe-area-inset-right,0px))}
+}
+@media (max-width:880px) and (max-height:460px){
+  .sidebar-content{overflow-y:auto}
+  .outline{overflow:visible}
 }
 @media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
 
 /* headings */
-h1{font-size:clamp(30px,5vw,44px);line-height:1.12;margin:6px 0 14px;font-weight:700;letter-spacing:-.01em}
-h2{font-size:23px;line-height:1.25;margin:44px 0 12px;font-weight:700}
-.kicker{font-size:15px;color:var(--muted);margin:0}
+h1,h2,h3{text-wrap:balance}
+h1{font-size:clamp(32px,5vw,52px);line-height:1.12;margin:8px 0 18px;font-weight:700;letter-spacing:-.035em}
+h2{font-size:clamp(23px,3vw,30px);line-height:1.25;margin:44px 0 12px;font-weight:700;letter-spacing:-.02em}
+.kicker{font:600 12px/1.5 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0}
 .lead{font-size:19px;line-height:1.6;color:var(--ink);max-width:62ch;margin:0 0 26px}
+.lesson-head{padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.breadcrumb{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin-bottom:20px;font:14px/1.45 var(--ui);color:var(--muted)}
+.breadcrumb a,.jump-link{color:var(--accent);text-underline-offset:3px}
+.lesson-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;font:14px/1.5 var(--ui);color:var(--muted)}
+.lesson-head .lead{margin-bottom:14px}
+.lesson-head a,.hero-actions a{min-height:44px;display:inline-flex;align-items:center}
 
 /* compare panes */
-.compare{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);margin:8px 0 10px}
+.compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);margin:8px 0 10px}
 .pane{min-width:0;display:flex;flex-direction:column}
 .pane + .pane{border-left:1px solid var(--line)}
-.pane-head{font-size:14px;font-weight:600;padding:8px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.pane-head{font:650 13px/1.5 var(--ui);padding:10px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
 .pane-head::before{content:"";width:10px;height:10px;border-radius:2px}
 .pane.ts .pane-head::before{background:var(--ts)}
 .pane.py .pane-head::before{background:var(--py)}
-.pane.ts{box-shadow:inset 0 3px 0 var(--ts)}
-.pane.py{box-shadow:inset 0 3px 0 var(--py)}
+.pane.ts .pane-head{background:var(--ts-soft);color:var(--ts)}
+.pane.py .pane-head{background:var(--py-soft);color:var(--py-ink)}
 .pane pre{flex:1}
 pre{margin:0;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.6;background:var(--code-bg);color:var(--ink);tab-size:4}
 .pane pre{background:transparent}
-@media (max-width:760px){
-  .compare{grid-template-columns:1fr}
-  .pane + .pane{border-left:0;border-top:1px solid var(--line)}
-}
 .run{font-size:14px;color:var(--muted);margin:0 0 6px}
 
 /* points */
@@ -143,7 +191,7 @@ pre{margin:0;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.6;
 .svg .venn-b{fill:var(--py-soft);stroke:var(--py);stroke-width:1.5;fill-opacity:.8}
 
 /* dictionary table */
-.dict{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);font-family:var(--mono);font-size:14px}
+.dict{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);font-family:var(--mono);font-size:14px}
 .dict > span{padding:8px 14px;border-top:1px solid var(--line)}
 .dict > span:nth-child(odd){border-right:1px solid var(--line)}
 .dict > .h{font-family:var(--serif);font-weight:600;font-size:14px;border-top:0}
@@ -164,7 +212,6 @@ pre{margin:0;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.6;
 .anatomy > div{padding:7px 10px;border-bottom:1px solid var(--line)}
 .anatomy .c{font-family:var(--mono);font-size:13.5px;white-space:pre;overflow-x:auto;background:var(--code-bg)}
 .anatomy .l{color:var(--muted)}
-@media (max-width:600px){.anatomy{grid-template-columns:1fr}.anatomy .l{border-bottom:1px solid var(--line);padding-bottom:12px}.anatomy .c{border-bottom:0}}
 
 .tree{background:var(--code-bg);border-radius:8px;font-size:13.5px}
 .tree .cm{color:var(--muted)}
@@ -182,60 +229,72 @@ pre{margin:0;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.6;
 .task.is-done::before{background:var(--ok-soft);color:var(--ok);border-color:var(--ok);content:"✓"}
 .task-text{margin:0 0 8px}
 .task details{margin:6px 0}
-.task summary{cursor:pointer;font-size:15px;color:var(--ts);width:fit-content}
+.task summary{cursor:pointer;font:600 14px/1.5 var(--ui);color:var(--accent);width:fit-content}
+.task summary:hover,.jump-link:hover,.breadcrumb a:hover{text-decoration-thickness:2px}
 .task details[open] summary{margin-bottom:6px}
 .task details p{margin:0;font-size:15px}
 .task pre{border-radius:6px;font-size:13px}
-.done{display:inline-flex;align-items:center;gap:8px;font-size:15px;margin-top:6px;cursor:pointer}
+.done{display:inline-flex;align-items:center;gap:8px;font:14px/1.5 var(--ui);margin-top:6px;cursor:pointer}
 .done input{width:18px;height:18px;accent-color:var(--ok)}
 
 /* lesson footer */
-.lesson-foot{margin-top:48px;padding-top:22px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
-.btn{font:inherit;font-size:16px;font-weight:600;border-radius:8px;padding:10px 18px;cursor:pointer;text-decoration:none;display:inline-block;border:1px solid transparent}
-.btn-primary{background:var(--ts);color:#fff}
-.btn-primary:hover{filter:brightness(1.08)}
-.btn-complete{background:var(--surface);border-color:var(--ok);color:var(--ok)}
-.btn-complete[aria-pressed="true"]{background:var(--ok);color:#fff}
-.pager{display:flex;gap:10px;flex-wrap:wrap}
-.pager a{font-size:15px;text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:8px 14px;color:var(--ink);background:var(--surface)}
-.pager a:hover{border-color:var(--ts)}
+.lesson-foot{margin-top:48px;border-top:1px solid var(--line)}
+.lesson-finish{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding-block:18px}
+.lesson-finish p{margin:0;font:14px/1.5 var(--ui);color:var(--muted)}
+.lesson-finish strong{display:block;margin-bottom:2px;color:var(--ink);font-size:16px}
+.btn{font:650 15px/1.4 var(--ui);min-height:44px;border-radius:8px;padding:10px 16px;cursor:pointer;text-decoration:none;display:inline-block;border:1px solid transparent}
+.btn-primary{background:var(--accent);color:var(--on-accent)}
+.btn-primary:hover{box-shadow:0 0 0 3px var(--line)}
+.btn-complete{background:var(--surface);border-color:var(--accent);color:var(--accent)}
+.btn-complete:hover,.btn-complete[aria-pressed="true"]{background:var(--accent-soft)}
+.btn-complete[aria-pressed="true"]::before{content:"✓";margin-right:7px}
+.pager{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pager a{display:block;text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:14px 16px;color:var(--ink);background:var(--surface)}
+.pager a:hover{border-color:var(--accent)}
+.pager .next{border-color:var(--accent);background:var(--accent-soft)}
+.pager small{display:block;font:600 11px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
 
 /* home */
-.hero{margin-bottom:44px}
-.hero h1{font-size:clamp(34px,6vw,58px);max-width:15ch}
-.rosetta{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);margin:26px 0 22px}
-.rosetta-head,.rosetta-row{display:grid;grid-template-columns:1fr 1fr}
-.rosetta-head span{font-size:14px;font-weight:600;padding:8px 16px;border-bottom:1px solid var(--line)}
-.rosetta-head span:first-child{box-shadow:inset 0 3px 0 var(--ts);border-right:1px solid var(--line)}
-.rosetta-head span:last-child{box-shadow:inset 0 3px 0 var(--py)}
-.rosetta-row code{display:block;padding:11px 16px;font-size:14px;white-space:pre;overflow-x:auto;border-bottom:1px solid var(--line)}
-.rosetta-row code:first-child{border-right:1px solid var(--line);color:var(--muted)}
-.rosetta-row:last-child code{border-bottom:0}
-.rosetta-row:hover code{background:var(--py-soft)}
-.rosetta-row:hover code:first-child{background:var(--ts-soft)}
-@media (max-width:760px){
-  .rosetta-head{display:none}
-  .rosetta-row{grid-template-columns:1fr}
-  .rosetta-row code:first-child{border-right:0;border-bottom:1px dashed var(--line)}
-  .rosetta-row code:first-child::before{content:"TS  ";color:var(--ts);font-weight:600}
-  .rosetta-row code:last-child::before{content:"PY  ";color:var(--py-ink);font-weight:600}
-}
-.hero-actions{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
-.hero-actions p{margin:0;color:var(--muted);font-size:15px}
-.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin:0;padding:0;list-style:none;counter-reset:s}
-.steps li{counter-increment:s;border-top:3px solid var(--line);padding-top:10px;font-size:15px}
-.steps li strong{display:block;font-size:16px}
-.steps li::before{content:counter(s);font-family:var(--mono);font-size:13px;color:var(--muted)}
-@media (max-width:760px){.steps{grid-template-columns:1fr 1fr}}
-.map{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 34px;margin-top:8px}
-@media (max-width:760px){.map{grid-template-columns:1fr}}
-.map h3{font-size:18px;margin:0 0 6px}
-.map p{margin:0 0 8px;font-size:15px;color:var(--muted)}
+.hero{padding-block:clamp(12px,4cqw,38px) 28px;border-top:2px solid var(--accent);border-bottom:1px solid var(--line)}
+.hero h1{font-size:clamp(38px,8cqw,72px);max-width:17ch;margin-bottom:18px}
+.hero h1 em{color:var(--accent);font-weight:600}
+.hero-actions{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}
+.hero-note{margin:9px 0 0;color:var(--muted);font:14px/1.5 var(--ui)}
+.hero-preview{margin:26px 0 0}
+.hero-preview figcaption{font:600 12px/1.5 var(--mono);letter-spacing:.07em;color:var(--accent);text-transform:uppercase}
+.section-intro{margin:0 0 18px;color:var(--muted);max-width:65ch}
+.map{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.map section{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:14px 16px}
+.map section:target{border-color:var(--accent)}
+.map h3{font-size:20px;line-height:1.25;margin:4px 0 8px}
+.map p{margin:0 0 10px;font-size:15px;color:var(--muted)}
+.map .module-meta{font:600 11px/1.5 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-bottom:4px}
 .map ol{list-style:none;margin:0;padding:0}
-.map li a{display:flex;gap:10px;padding:4px 0;text-decoration:none;color:var(--ink);font-size:15.5px;border-bottom:1px solid var(--line)}
-.map li a:hover{color:var(--ts)}
-.map .num{font-family:var(--mono);font-size:12.5px;color:var(--muted);padding-top:3px;min-width:22px}
+.map li a{display:flex;gap:8px;align-items:center;min-height:44px;padding:6px 0;text-decoration:none;color:var(--ink);font:14px/1.4 var(--ui);border-top:1px solid var(--line)}
+.map li a:hover{color:var(--accent);text-decoration:underline}
+.map .num{min-width:22px}
 .map .check{margin-left:auto;color:var(--ok)}
+.map .next-up{margin-left:auto;color:var(--accent);font:600 11px/1.25 var(--ui);text-align:right}
+.home-guide{border-top:1px solid var(--line);margin-top:32px}
+.home-guide h2{margin-top:24px}
+
+@container (max-width:720px){
+  .compare,.map{grid-template-columns:minmax(0,1fr)}
+  .pane + .pane{border-left:0;border-top:1px solid var(--line)}
+}
+@container (max-width:560px){
+  .anatomy{grid-template-columns:minmax(0,1fr)}
+  .anatomy .l{padding-bottom:12px}
+  .anatomy .c{border-bottom:0}
+}
+@container (max-width:440px){
+  .figure,.trap{padding:12px}
+  pre{padding:10px 12px}
+  .dict > span,.truth th,.truth td{padding:6px 8px}
+  .task{padding:12px 12px 12px 44px}
+  .task::before{left:10px;top:12px}
+  .lesson-finish,.pager{display:grid;grid-template-columns:minmax(0,1fr)}
+}
 
 /* prism tokens */
 .token.comment,.token.prolog{color:var(--muted);font-style:italic}
@@ -253,44 +312,79 @@ pre{margin:0;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.6;
 </script>
 </head>
 <body>
+<a class="skip-link" id="skipLink" href="#main">Skip to content</a>
 <header class="topbar">
-  <button class="btn-quiet" id="menuBtn" aria-controls="sidebar" aria-expanded="false">Lessons</button>
-  <a class="t" href="#">Python for TS developers</a>
-  <button class="btn-quiet themeBtn" aria-label="Switch color theme">Theme</button>
+  <button class="btn-quiet icon-btn" id="menuBtn" type="button" aria-label="Lessons" aria-controls="sidebar" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <a class="t" href="#">Python for TypeScript devs</a>
+  <button class="btn-quiet icon-btn themeBtn" type="button" aria-label="Switch color theme">
+    <svg class="theme-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5a8.75 8.75 0 0 1-11-11 8.75 8.75 0 1 0 11 11Z"/></svg>
+    <svg class="theme-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42m0-14.14-1.42 1.42m-11.3 11.3-1.42 1.42"/></svg>
+  </button>
 </header>
+<div class="drawer-backdrop" id="drawerBackdrop" aria-hidden="true" hidden></div>
 <div class="app">
-  <nav class="sidebar" id="sidebar" aria-label="Course">
-    <a class="brand" href="#">Python for TypeScript developers<small>40 lessons, side by side</small></a>
-    <div class="progress"><div class="progress-bar"><span id="progBar"></span></div><p id="progText"></p></div>
-    <div id="navList"></div>
-    <div class="side-foot"><button class="btn-quiet themeBtn">Switch to dark theme</button></div>
-  </nav>
-  <main id="main"><div class="wrap" id="view"></div></main>
+  <div class="sidebar" id="sidebar">
+    <div class="drawer-head">
+      <strong id="drawerTitle">Course lessons</strong>
+      <button class="btn-quiet" id="drawerClose" type="button">Close</button>
+    </div>
+    <nav class="sidebar-content" aria-label="Course navigation">
+      <div class="outline-tools">
+        <a class="brand" href="#"><span class="brand-mark" aria-hidden="true">Py</span><span>Python for TypeScript developers<small>Course overview</small></span></a>
+        <div class="progress"><p id="progText"></p><progress class="progress-bar" id="progBar" aria-labelledby="progText"></progress></div>
+        <div class="lesson-search">
+          <label for="lessonSearch">Find a lesson</label>
+          <div class="search-field">
+            <input id="lessonSearch" type="search" placeholder="e.g. async or 29" autocomplete="off">
+            <button type="button" class="btn-quiet" id="clearSearch" hidden>Clear</button>
+          </div>
+        </div>
+      </div>
+      <div class="outline">
+        <p class="outline-note" id="searchStatus" role="status"></p>
+        <div id="navList"></div>
+        <div class="side-foot"><button class="btn-quiet themeBtn" type="button">Switch to dark theme</button></div>
+      </div>
+    </nav>
+  </div>
+  <main id="main">
+    <p class="storage-note" id="storageNote" role="status" hidden></p>
+    <div class="wrap" id="view"></div>
+  </main>
 </div>
 
 <template id="home-tpl">
   <section class="hero">
-    <p class="kicker">A free course for people who already write TypeScript</p>
-    <h1>Python, translated from TypeScript</h1>
-    <p class="lead">40 short lessons that start from the code you already write. Each one puts TypeScript and Python side by side, explains only what’s different, and ends with tasks to practice.</p>
-    <div class="rosetta" aria-label="The same code in TypeScript and Python">
-      <div class="rosetta-head"><span>TypeScript</span><span>Python</span></div>
-      <div class="rosetta-row"><code>const users: User[] = await load();</code><code>users: list[User] = await load()</code></div>
-      <div class="rosetta-row"><code>const adults = users.filter(u =&gt; u.age &gt;= 18);</code><code>adults = [u for u in users if u.age &gt;= 18]</code></div>
-      <div class="rosetta-row"><code>const names = adults.map(u =&gt; u.name).join(", ");</code><code>names = ", ".join(u.name for u in adults)</code></div>
-      <div class="rosetta-row"><code>console.log(`Found ${adults.length}`);</code><code>print(f"Found {len(adults)}")</code></div>
+    <p class="kicker">A hands-on course for TypeScript developers</p>
+    <h1>Learn Python <em>through TypeScript.</em></h1>
+    <p class="lead">Start with the code you already know. Compare it with Python, understand what works differently, and put it into practice.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" id="startBtn" href="#lesson-01">Start lesson 1</a>
+      <a class="jump-link" href="#curriculum">Browse the curriculum</a>
     </div>
-    <div class="hero-actions"><a class="btn btn-primary" id="startBtn" href="#lesson-01">Start lesson 1</a><p id="homeProg"></p></div>
+    <p class="hero-note" id="homeProg">8 modules · 40 lessons · 120 exercises</p>
+    <figure class="hero-preview">
+      <figcaption>Same task: keep the adults</figcaption>
+      <div class="compare">
+        <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">const adults = users.filter(
+  user =&gt; user.age &gt;= 18
+);</code></pre></div>
+        <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">adults = [
+    user for user in users
+    if user.age &gt;= 18
+]</code></pre></div>
+      </div>
+    </figure>
   </section>
-  <h2>How each lesson works</h2>
-  <ol class="steps">
-    <li><strong>Compare</strong>The TypeScript you know next to the Python that does the same.</li>
-    <li><strong>Learn the differences</strong>Only what changes, nothing you already know.</li>
-    <li><strong>See it</strong>A diagram or table that makes the idea stick.</li>
-    <li><strong>Practice</strong>Three tasks with hints and solutions. Run them on your machine.</li>
-  </ol>
-  <h2>Course map</h2>
+  <h2 id="curriculum">Curriculum</h2>
+  <p class="section-intro">If you’re new to Python, go in order. If you’re here for a refresher, jump straight to a topic.</p>
   <div class="map" id="courseMap"></div>
+  <section class="home-guide">
+    <h2>How to practice</h2>
+    <p class="section-intro">Read the lessons here and run the exercises on your computer. Follow the <a href="https://github.com/rebp/python-for-ts-devs#getting-started">setup instructions</a>, then use <code>uv run course.py</code> to find your next exercise. Lesson checkmarks are saved in this browser; the exercise runner tracks its own progress.</p>
+  </section>
 </template>
 
 <!-- ================= SECTION 1 ================= -->
@@ -3858,7 +3952,7 @@ dev = [
 <script>
 (function () {
   var SECTIONS = {
-    1: { name: "Python for TypeScript developers", blurb: "Syntax, types, functions and control flow, mapped from what you know." },
+    1: { name: "Python fundamentals", blurb: "Syntax, types, functions and control flow, mapped from what you know." },
     2: { name: "How Python handles data", blurb: "Names, mutability, truthiness and scope: where TS instincts mislead." },
     3: { name: "Your own types", blurb: "Classes, dataclasses, enums, optional values, Protocols and Pydantic." },
     4: { name: "Collections and errors", blurb: "Lists, strings, dicts, sets and exceptions." },
@@ -3868,21 +3962,115 @@ dev = [
     8: { name: "Python in the real world", blurb: "Frameworks, production services, command-line tools, data work and what to learn next." }
   };
   var KEY = "pyts-progress";
+  var storageNote = document.getElementById("storageNote");
+  function showStorageNote(message) {
+    storageNote.hidden = false;
+    storageNote.textContent = message;
+  }
   function load() {
-    try { var v = JSON.parse(localStorage.getItem(KEY)); if (v && v.lessons && v.tasks) return v; } catch (e) {}
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw !== null) {
+        var saved = JSON.parse(raw);
+        if (saved && saved.lessons && saved.tasks) return saved;
+        throw new Error("Unrecognized progress format");
+      }
+    } catch (e) {
+      showStorageNote("Saved progress couldn’t be read. You can still use the course.");
+    }
     return { lessons: {}, tasks: {} };
   }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function save() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+      storageNote.hidden = true;
+    } catch (e) {
+      showStorageNote("Progress couldn’t be saved in this browser. Check your browser’s storage settings before closing this page.");
+    }
+  }
   var state = load();
 
   var lessons = Array.prototype.map.call(document.querySelectorAll("template.lesson"), function (t) {
     return { n: t.dataset.n, section: +t.dataset.section, title: t.dataset.title, summary: t.dataset.summary, tpl: t };
   });
+  var modules = Object.keys(SECTIONS).map(function (id) {
+    return { id: id, name: SECTIONS[id].name, blurb: SECTIONS[id].blurb, lessons: lessons.filter(function (l) { return l.section === +id; }) };
+  });
   var view = document.getElementById("view");
   var navList = document.getElementById("navList");
+  var search = document.getElementById("lessonSearch");
+  var clearSearch = document.getElementById("clearSearch");
+  var searchStatus = document.getElementById("searchStatus");
+  var expandedBeforeSearch;
+  var renderedPage;
+  var mobile = matchMedia("(max-width:880px)");
+  var main = document.getElementById("main");
+  var drawer = document.getElementById("sidebar");
+  var drawerContent = drawer.querySelector(".sidebar-content");
+  var drawerClose = document.getElementById("drawerClose");
+  var drawerBackdrop = document.getElementById("drawerBackdrop");
+  var menuBtn = document.getElementById("menuBtn");
+  var topbar = menuBtn.closest(".topbar");
+  var skipLink = document.getElementById("skipLink");
+  var scrollPanels = ".figure-scroll, pre, .anatomy .c";
+  var scrollObserver = new ResizeObserver(function (entries) {
+    updateScrollPanels(entries.map(function (entry) { return entry.target; }));
+  });
+
+  function updateScrollPanels(panels) {
+    var overflow = Array.from(panels, function (panel) { return panel.scrollWidth > panel.clientWidth; });
+    panels.forEach(function (panel, i) {
+      if (overflow[i]) panel.tabIndex = 0;
+      else panel.removeAttribute("tabindex");
+    });
+  }
+
+  function revealCurrentLesson() {
+    var current = navList.querySelector('[aria-current="page"]');
+    if (!current || !current.getClientRects().length) return;
+    var outline = navList.closest(".outline");
+    var scroller = getComputedStyle(outline).overflowY === "auto" ? outline : drawerContent;
+    var link = current.getBoundingClientRect();
+    var panel = scroller.getBoundingClientRect();
+    if (link.top < panel.top) scroller.scrollTop += link.top - panel.top - 8;
+    else if (link.bottom > panel.bottom) scroller.scrollTop += link.bottom - panel.bottom + 8;
+  }
+
+  function setDrawer(open) {
+    document.body.classList.toggle("nav-open", open);
+    menuBtn.setAttribute("aria-expanded", String(open));
+    drawerBackdrop.hidden = !open;
+    skipLink.inert = topbar.inert = main.inert = open;
+    if (open) {
+      drawer.setAttribute("role", "dialog");
+      drawer.setAttribute("aria-modal", "true");
+      drawer.setAttribute("aria-labelledby", "drawerTitle");
+      drawerClose.focus();
+      revealCurrentLesson();
+    } else {
+      drawer.removeAttribute("role");
+      drawer.removeAttribute("aria-modal");
+      drawer.removeAttribute("aria-labelledby");
+    }
+  }
+
+  function closeDrawer() {
+    setDrawer(false);
+    menuBtn.focus({ preventScroll: true });
+  }
+
+  function focusHeading(heading) {
+    var target = heading || view.querySelector("h1");
+    target.tabIndex = -1;
+    target.focus({ preventScroll: true });
+  }
 
   function doneCount() { return lessons.filter(function (l) { return state.lessons[l.n]; }).length; }
-  function firstOpen() { for (var i = 0; i < lessons.length; i++) if (!state.lessons[lessons[i].n]) return lessons[i]; return null; }
+  function resumeLesson() {
+    var last = lessons.findIndex(function (l) { return l.n === state.lastLesson; });
+    return lessons.slice(Math.max(0, last)).find(function (l) { return !state.lessons[l.n]; }) ||
+      lessons.find(function (l) { return !state.lessons[l.n]; });
+  }
 
   function el(tag, attrs, text) {
     var e = document.createElement(tag);
@@ -3891,34 +4079,87 @@ dev = [
     return e;
   }
 
-  function updateProgress() {
+  function updateOutline(current) {
     var d = doneCount(), total = lessons.length;
-    document.getElementById("progBar").style.width = (d / total * 100) + "%";
+    var progress = document.getElementById("progBar");
+    progress.max = total;
+    progress.value = d;
     document.getElementById("progText").textContent = d + " of " + total + " lessons complete";
+    lessons.forEach(function (l) {
+      var a = l.outlineLink;
+      var chk = a.querySelector(".check");
+      var done = !!state.lessons[l.n];
+      chk.hidden = !done;
+      if (l === current) {
+        a.setAttribute("aria-current", "page");
+        a.closest("details").open = true;
+      } else {
+        a.removeAttribute("aria-current");
+      }
+    });
   }
 
-  function buildNav(current) {
-    navList.innerHTML = "";
-    var bySection = {};
-    lessons.forEach(function (l) { (bySection[l.section] = bySection[l.section] || []).push(l); });
-    Object.keys(SECTIONS).forEach(function (s) {
-      navList.appendChild(el("div", { class: "nav-section" }, s + ". " + SECTIONS[s].name));
-      var ol = el("ol", { class: "nav-list" });
-      (bySection[s] || []).forEach(function (l) {
-        var li = el("li");
-        var a = el("a", { href: "#lesson-" + l.n });
-        if (current === l.n) a.setAttribute("aria-current", "page");
-        a.appendChild(el("span", { class: "num" }, l.n));
-        a.appendChild(el("span", null, l.title));
-        var chk = el("span", { class: "check" }, state.lessons[l.n] ? "✓" : "");
-        if (state.lessons[l.n]) chk.setAttribute("aria-label", "complete");
-        a.appendChild(chk);
-        li.appendChild(a);
-        ol.appendChild(li);
+  function lessonLink(l) {
+    var a = el("a", { href: "#lesson-" + l.n });
+    a.appendChild(el("span", { class: "num" }, l.n));
+    a.appendChild(el("span", null, l.title));
+    var check = el("span", { class: "check", role: "img", "aria-label": "Completed" }, "✓");
+    check.hidden = !state.lessons[l.n];
+    a.appendChild(check);
+    return a;
+  }
+
+  function buildOutline() {
+    modules.forEach(function (module) {
+      var group = el("details", { class: "nav-section" });
+      group.open = module.id === "1";
+      var summary = el("summary");
+      summary.appendChild(el("span", { class: "num" }, module.id));
+      summary.appendChild(document.createTextNode(module.name));
+      var list = el("ol", { class: "nav-list" });
+      module.lessons.forEach(function (l) {
+        var item = el("li");
+        l.outlineLink = lessonLink(l);
+        item.appendChild(l.outlineLink);
+        list.appendChild(item);
       });
-      navList.appendChild(ol);
+      group.appendChild(summary);
+      group.appendChild(list);
+      module.outline = group;
+      navList.appendChild(group);
     });
-    updateProgress();
+  }
+
+  function filterOutline() {
+    var query = search.value.trim().toLowerCase();
+    var terms = query ? query.split(/\s+/) : [];
+    var count = 0;
+    if (query && !expandedBeforeSearch) {
+      expandedBeforeSearch = modules.map(function (module) { return module.outline.open; });
+    }
+    modules.forEach(function (module, i) {
+      var any = false;
+      module.lessons.forEach(function (l) {
+        var description = (l.title + " " + l.summary + " " + module.name).toLowerCase();
+        var matches = terms.every(function (term) {
+          return /^\d+$/.test(term) ? Number(term) === Number(l.n) : description.includes(term);
+        });
+        l.outlineLink.parentElement.hidden = !matches;
+        if (matches) { any = true; count++; }
+      });
+      module.outline.hidden = !any;
+      if (query) module.outline.open = any;
+      else if (expandedBeforeSearch) module.outline.open = expandedBeforeSearch[i];
+    });
+    if (!query) expandedBeforeSearch = null;
+    clearSearch.hidden = search.value === "";
+    searchStatus.textContent = !query ? "" : count ? count + (count === 1 ? " lesson found" : " lessons found") : "No lessons found. Try a topic or lesson number.";
+  }
+
+  function resetSearch() {
+    if (!search.value && !expandedBeforeSearch) return;
+    search.value = "";
+    filterOutline();
   }
 
   function highlight() { if (window.Prism && Prism.highlightAllUnder) { try { Prism.highlightAllUnder(view); } catch (e) {} } }
@@ -3927,43 +4168,65 @@ dev = [
     document.title = "Python for TypeScript developers";
     view.innerHTML = "";
     view.appendChild(document.getElementById("home-tpl").content.cloneNode(true));
-    var d = doneCount(), next = firstOpen();
+    var d = doneCount(), next = resumeLesson();
     var start = document.getElementById("startBtn");
-    if (d > 0 && next) { start.textContent = "Continue with lesson " + Number(next.n); start.href = "#lesson-" + next.n; }
-    else if (!next) { start.textContent = "Review lesson 1"; }
-    document.getElementById("homeProg").textContent = d ? d + " of " + lessons.length + " lessons complete" : "About 20 minutes per lesson, plus practice";
+    if (next && (d || state.lastLesson)) {
+      start.textContent = "Resume lesson " + Number(next.n);
+      start.href = "#lesson-" + next.n;
+    } else if (!next) {
+      start.textContent = "Review lesson 1";
+    }
+    var homeProg = document.getElementById("homeProg");
+    if (d || state.lastLesson) {
+      homeProg.textContent = d + " of " + lessons.length + " lessons complete" + (next ? " · Next: " + next.title : "");
+    }
     var map = document.getElementById("courseMap");
-    Object.keys(SECTIONS).forEach(function (s) {
-      var box = el("div");
-      box.appendChild(el("h3", null, s + ". " + SECTIONS[s].name));
-      box.appendChild(el("p", null, SECTIONS[s].blurb));
+    modules.forEach(function (module) {
+      var box = el("section", { id: "module-" + module.id });
+      var completed = module.lessons.filter(function (l) { return state.lessons[l.n]; }).length;
+      var count = completed ? completed + "/" + module.lessons.length + " complete" : module.lessons.length + " lessons";
+      box.appendChild(el("p", { class: "module-meta" }, "Module " + module.id + " · " + count));
+      box.appendChild(el("h3", null, module.name));
+      box.appendChild(el("p", null, module.blurb));
       var ol = el("ol");
-      lessons.filter(function (l) { return l.section === +s; }).forEach(function (l) {
-        var li = el("li"), a = el("a", { href: "#lesson-" + l.n });
-        a.appendChild(el("span", { class: "num" }, l.n));
-        a.appendChild(el("span", null, l.title));
-        if (state.lessons[l.n]) a.appendChild(el("span", { class: "check", "aria-label": "complete" }, "✓"));
+      module.lessons.forEach(function (l) {
+        var li = el("li"), a = lessonLink(l);
+        if (l === next && (d || state.lastLesson)) a.appendChild(el("span", { class: "next-up" }, "Up next"));
         li.appendChild(a); ol.appendChild(li);
       });
       box.appendChild(ol);
       map.appendChild(box);
     });
-    buildNav(null);
   }
 
   function renderLesson(l) {
     var idx = lessons.indexOf(l);
     document.title = l.title + " · Python for TypeScript developers";
     view.innerHTML = "";
-    var head = el("header");
-    head.appendChild(el("p", { class: "kicker" }, "Lesson " + Number(l.n) + " of " + lessons.length + ", " + SECTIONS[l.section].name));
+    var head = el("header", { class: "lesson-head" });
+    var breadcrumb = el("nav", { class: "breadcrumb", "aria-label": "Breadcrumb" });
+    breadcrumb.appendChild(el("a", { href: "#curriculum" }, "Curriculum"));
+    breadcrumb.appendChild(el("span", { "aria-hidden": "true" }, "/"));
+    breadcrumb.appendChild(el("a", { href: "#module-" + l.section }, SECTIONS[l.section].name));
+    head.appendChild(breadcrumb);
+    head.appendChild(el("p", { class: "kicker" }, "Module " + l.section + " · Lesson " + l.n + " of " + lessons.length));
     head.appendChild(el("h1", null, l.title));
     view.appendChild(head);
     var body = el("article");
     body.appendChild(l.tpl.content.cloneNode(true));
     view.appendChild(body);
 
-    body.querySelectorAll(".task").forEach(function (task) {
+    var lead = body.querySelector(".lead");
+    if (lead) head.appendChild(lead);
+    var meta = el("div", { class: "lesson-meta" });
+    var tasks = body.querySelectorAll(".task");
+    var practice = body.querySelector(".tasks").previousElementSibling;
+    practice.id = "lesson-" + l.n + "-practice";
+    meta.appendChild(el("span", null, "About 20 min + practice"));
+    meta.appendChild(el("a", { class: "jump-link", href: "#" + practice.id }, "Jump to practice ↓"));
+    head.appendChild(meta);
+
+    tasks.forEach(function (task) {
       var id = task.dataset.task, box = task.querySelector(".done input");
       if (!box) return;
       box.checked = !!state.tasks[id];
@@ -3972,64 +4235,142 @@ dev = [
         if (box.checked) state.tasks[id] = true; else delete state.tasks[id];
         task.classList.toggle("is-done", box.checked);
         save();
+        syncFinish();
       });
     });
 
     var foot = el("footer", { class: "lesson-foot" });
-    var btn = el("button", { class: "btn btn-complete", type: "button" });
-    function syncBtn() {
+    var finish = el("div", { class: "lesson-finish" });
+    var finishCopy = el("div");
+    var finishTitle = el("strong");
+    var taskCount = el("p", { role: "status" });
+    var btn = el("button", { class: "btn btn-complete", type: "button" }, "Mark lesson complete");
+    function syncFinish() {
       var done = !!state.lessons[l.n];
       btn.setAttribute("aria-pressed", done ? "true" : "false");
-      btn.textContent = done ? "Lesson complete" : "Mark lesson as complete";
+      finishTitle.textContent = done ? "Lesson complete" : "Wrap up this lesson";
+      taskCount.textContent = body.querySelectorAll(".task.is-done").length + " of " + tasks.length + " exercises checked off";
     }
-    syncBtn();
+    syncFinish();
     btn.addEventListener("click", function () {
       if (state.lessons[l.n]) delete state.lessons[l.n]; else state.lessons[l.n] = true;
-      save(); syncBtn(); buildNav(l.n);
+      save(); syncFinish(); updateOutline(l);
     });
-    foot.appendChild(btn);
+    finishCopy.appendChild(finishTitle);
+    finishCopy.appendChild(taskCount);
+    finish.appendChild(finishCopy);
+    finish.appendChild(btn);
+    foot.appendChild(finish);
+
+    function addPagerLink(href, label, title, next) {
+      var link = el("a", { href: href, class: next ? "next" : "previous" });
+      link.appendChild(el("small", null, label));
+      link.appendChild(document.createTextNode(title));
+      pager.appendChild(link);
+    }
     var pager = el("nav", { class: "pager", "aria-label": "Lesson navigation" });
-    if (idx > 0) pager.appendChild(el("a", { href: "#lesson-" + lessons[idx - 1].n }, "Previous: " + lessons[idx - 1].title));
-    if (idx < lessons.length - 1) pager.appendChild(el("a", { href: "#lesson-" + lessons[idx + 1].n }, "Next: " + lessons[idx + 1].title));
-    else pager.appendChild(el("a", { href: "#" }, "Back to the course map"));
+    if (idx > 0) addPagerLink("#lesson-" + lessons[idx - 1].n, "← Previous lesson", lessons[idx - 1].title, false);
+    if (idx < lessons.length - 1) addPagerLink("#lesson-" + lessons[idx + 1].n, "Next lesson →", lessons[idx + 1].title, true);
+    else addPagerLink("#curriculum", "Course overview →", "Back to the curriculum", true);
     foot.appendChild(pager);
     view.appendChild(foot);
-    buildNav(l.n);
   }
 
-  function route() {
-    var m = /^#lesson-(\d\d)$/.exec(location.hash);
-    var l = m && lessons.filter(function (x) { return x.n === m[1]; })[0];
-    if (l) renderLesson(l); else renderHome();
-    highlight();
-    document.body.classList.remove("nav-open");
-    document.getElementById("menuBtn").setAttribute("aria-expanded", "false");
-    window.scrollTo(0, 0);
-    var cur = navList.querySelector('[aria-current="page"]');
-    if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: "nearest" });
+  function route(event) {
+    var hash = location.hash;
+    var m = /^#lesson-(\d\d)(-practice)?$/.exec(hash);
+    var l = m ? lessons.find(function (x) { return x.n === m[1]; }) : undefined;
+    var page = l ? l.n : "home";
+    if (renderedPage !== page) {
+      resetSearch();
+      if (l) {
+        if (state.lastLesson !== l.n) { state.lastLesson = l.n; save(); }
+        renderLesson(l);
+      } else {
+        renderHome();
+      }
+      renderedPage = page;
+      updateOutline(l);
+      highlight();
+      scrollObserver.disconnect();
+      view.querySelectorAll(scrollPanels).forEach(function (panel) { scrollObserver.observe(panel); });
+    }
+    setDrawer(false);
+    var section = ((l && m[2]) || (!l && /^#(?:curriculum|module-[1-8])$/.test(hash))) ? document.getElementById(hash.slice(1)) : null;
+    if (section) section.scrollIntoView();
+    else window.scrollTo(0, 0);
+    if (!mobile.matches) revealCurrentLesson();
+    if (event) focusHeading(section && (section.querySelector("h3") || section));
   }
 
-  document.getElementById("menuBtn").addEventListener("click", function () {
-    var open = document.body.classList.toggle("nav-open");
-    this.setAttribute("aria-expanded", open ? "true" : "false");
+  document.fonts.addEventListener("loadingdone", function () { updateScrollPanels(view.querySelectorAll(scrollPanels)); });
+  view.addEventListener("keydown", function (e) {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    if (!e.target.matches(scrollPanels) || e.target.tabIndex !== 0) return;
+    e.preventDefault();
+    e.target.scrollLeft += e.key === "ArrowRight" ? 40 : -40;
   });
-  document.addEventListener("click", function (e) {
-    if (document.body.classList.contains("nav-open") && !e.target.closest(".sidebar") && !e.target.closest("#menuBtn")) {
-      document.body.classList.remove("nav-open");
+  skipLink.addEventListener("click", function (e) {
+    e.preventDefault();
+    main.scrollIntoView({ block: "start" });
+    focusHeading();
+  });
+  menuBtn.addEventListener("click", function () { setDrawer(true); });
+  search.addEventListener("input", filterOutline);
+  clearSearch.addEventListener("click", function () { resetSearch(); search.focus(); });
+  drawerClose.addEventListener("click", closeDrawer);
+  drawerBackdrop.addEventListener("click", closeDrawer);
+  drawer.addEventListener("click", function (e) {
+    var link = e.target.closest("a");
+    if (!mobile.matches || !link || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (link.getAttribute("href") === (location.hash || "#")) {
+      e.preventDefault();
+      resetSearch();
+      setDrawer(false);
+      window.scrollTo(0, 0);
+      focusHeading();
     }
   });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") document.body.classList.remove("nav-open"); });
+  drawer.addEventListener("keydown", function (e) {
+    if (menuBtn.getAttribute("aria-expanded") !== "true") return;
+    if (e.key === "Escape") {
+      closeDrawer();
+    } else if (e.key === "Tab") {
+      var last = drawer.querySelector(".side-foot button");
+      if (e.shiftKey && document.activeElement === drawerClose) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        drawerClose.focus();
+      }
+    }
+  });
+  mobile.addEventListener("change", function () {
+    var active = document.activeElement;
+    var wasOpen = menuBtn.getAttribute("aria-expanded") === "true";
+    setDrawer(false);
+    if (mobile.matches && drawer.contains(active)) menuBtn.focus({ preventScroll: true });
+    if (!mobile.matches) {
+      revealCurrentLesson();
+      if (wasOpen || topbar.contains(active)) focusHeading();
+    }
+  });
 
   var root = document.documentElement;
+  var systemTheme = matchMedia("(prefers-color-scheme: dark)");
   function isDark() {
     var t = root.getAttribute("data-theme");
     if (t) return t === "dark";
-    return window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches;
+    return systemTheme.matches;
   }
   function syncThemeBtns() {
+    var dark = isDark();
     document.querySelectorAll(".themeBtn").forEach(function (b) {
-      var label = isDark() ? "Switch to light theme" : "Switch to dark theme";
+      var label = dark ? "Switch to light theme" : "Switch to dark theme";
       if (b.closest(".side-foot")) b.textContent = label;
+      else b.toggleAttribute("data-dark", dark);
       b.setAttribute("aria-label", label);
     });
   }
@@ -4041,8 +4382,10 @@ dev = [
       syncThemeBtns();
     });
   });
+  systemTheme.addEventListener("change", syncThemeBtns);
   syncThemeBtns();
 
+  buildOutline();
   window.addEventListener("hashchange", route);
   route();
 })();
