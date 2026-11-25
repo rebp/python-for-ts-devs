@@ -59,7 +59,8 @@ Then open a new terminal so the `uv` command is found. Homebrew
 
 3. Open the [course website](https://rebp.github.io/python-for-ts-devs/) or
    double-click `index.html` to read locally. Start from the curriculum or
-   use **Find a lesson** to search by topic or number. On smaller screens,
+   use **Find a lesson** to search by lesson number, title, or topic heading
+   (try `keyword-only` or `enum members`). On smaller screens,
    tap the menu icon to open **Lessons** and find the search box. Use the
    sun or moon icon to switch themes. You can swipe sideways inside wide
    diagrams and code examples.
@@ -77,7 +78,8 @@ Then open a new terminal so the `uv` command is found. Homebrew
 
 For each lesson:
 
-1. **Read the lesson** in the browser. It takes about 20 minutes.
+1. **Read the lesson** in the browser. Start with the quick comparison, then
+   work through the examples before practice.
 2. **Do its three exercises** with `uv run course.py`, which always shows the
    next one.
 3. **Compare with the solution** in `solutions/` once your tests pass, or

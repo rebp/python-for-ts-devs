@@ -433,6 +433,13 @@ if len(name) &gt; 2:
     <figcaption>The yellow strip is the block. <code>print("done")</code> sits outside it because it’s back at the left edge.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Wrong indentation isn’t a style warning, it’s an <code>IndentationError</code> or a silent logic change. Let your editor insert 4 spaces and never mix tabs and spaces.</p></aside>
+  <h2>Read the indentation</h2>
+  <p>In TypeScript, braces tell you where a block ends. In Python, look for the next line that moves back to the left. Here, only the first <code>print()</code> belongs to the <code>if</code>:</p>
+  <pre><code class="language-python">name = "Ada"
+if name == "Ada":
+    print(f"Hello, {name}!")
+print("Ready.")</code></pre>
+  <p>Save this as <code>hello.py</code> and run <code>uv run hello.py</code>. Change the name to <code>"Grace"</code> and rerun it: you’ll still see <code>Ready.</code> To try one expression at a time, run <code>uv run python</code> and type it at the <code>&gt;&gt;&gt;</code> prompt. The REPL shows expression results; in a file, use <code>print()</code> to show them.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="01-1"><p class="task-text">Create <code>me.py</code> that prints your name on one line and your favorite language on the next. Run it with <code>uv run me.py</code>.</p>
@@ -453,7 +460,7 @@ print(f"I've lived in {city} since {year}")</code></pre></details>
   </ol>
 </template>
 
-<template class="lesson" data-n="02" data-section="1" data-title="Variables and types" data-summary="No let or const, two kinds of number, and a type system that never coerces.">
+<template class="lesson" data-n="02" data-section="1" data-title="Variables and types" data-summary="Names, numeric types, explicit conversion, and what type hints do.">
   <p class="lead">You assign with <code>=</code> and that’s it. Type hints look almost like TypeScript annotations, but Python doesn’t check them when it runs.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">let count: number = 3;
@@ -474,8 +481,8 @@ total = count * price</code></pre></div>
     <li>No <code>let</code> or <code>const</code>. Constants are a naming convention, <code>MAX_SIZE = 10</code>, and nothing stops you reassigning them.</li>
     <li><code>number</code> splits into <code>int</code> (whole numbers of any size, no overflow) and <code>float</code>. Write big numbers as <code>1_000_000</code>.</li>
     <li>Floats behave like JavaScript numbers: <code>0.1 + 0.2</code> is <code>0.30000000000000004</code>. For money, use <code>decimal.Decimal("0.10")</code>. And <code>round()</code> rounds halves to the nearest even number: <code>round(2.5)</code> is <code>2</code>, while <code>Math.round(2.5)</code> is 3.</li>
-    <li>Booleans are <code>True</code> and <code>False</code> and <code>False</code>, capitalized. Logic uses words: <code>and</code>, <code>or</code>, <code>not</code>.</li>
-    <li>Python is strongly typed: it never converts types for you. Convert explicitly with <code>int("3")</code>, <code>str(3)</code>, <code>float("2.5")</code>.</li>
+    <li>Booleans are <code>True</code> and <code>False</code>, capitalized. Logic uses words: <code>and</code>, <code>or</code>, <code>not</code>.</li>
+    <li>Python won’t mix strings and numbers in arithmetic. Convert explicitly with <code>int("3")</code>, <code>str(3)</code> or <code>float("2.5")</code>. Compatible numeric types can still mix: <code>3 + 0.5</code> produces the float <code>3.5</code>.</li>
     <li>Type hints are optional and ignored at runtime. A type checker (lesson 21) reads them, like <code>tsc</code>.</li>
   </ul>
   <h2>See it</h2>
@@ -496,6 +503,15 @@ total = count * price</code></pre></div>
     <figcaption>Keep this table open for the first few weeks. Generic types use square brackets instead of angle brackets.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>In JavaScript <code>"3" + 3</code> gives <code>"33"</code>. In Python it raises <code>TypeError</code>. That error is your friend: it catches bugs that JavaScript hides.</p></aside>
+  <h2>Convert input explicitly</h2>
+  <p>Text from an input field or environment variable starts out as a string. An annotation tells the checker what to expect; it doesn’t parse the text. Use <code>int()</code> when you expect whole numbers.</p>
+  <pre><code class="language-python">raw = "7"
+minutes: int = int(raw)
+print(minutes / 2)   # 3.5 (division returns a float)
+print(minutes // 2)  # 3 (floor division rounds down)
+print(minutes % 2)   # 1 (remainder)
+print(-minutes // 2) # -4 (down, not toward zero)</code></pre>
+  <p>Unlike JavaScript’s <code>parseInt("7min", 10)</code>, <code>int("7min")</code> doesn’t accept a numeric prefix; it raises <code>ValueError</code>. If such input is expected, handle it where you parse it (see <a href="#lesson-18">Lesson 18 on exceptions</a>).</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="02-1"><p class="task-text">Create variables for a product name, a price and a quantity. Print the total with exactly two decimals.</p>
@@ -548,7 +564,7 @@ total(1, 2, 3)</code></pre></div>
     <li>Keyword arguments, <code>greet(name="Ada")</code>, replace the “options object” pattern you use in TS.</li>
     <li><code>*args</code> collects extra positional arguments into a tuple (rest parameters). <code>**kwargs</code> collects extra keyword arguments into a dict.</li>
     <li>Spread works too: <code>total(*[1, 2, 3])</code> and <code>greet(**{"name": "Ada"})</code>.</li>
-    <li>One-expression functions can be lambdas: <code>double = lambda x: x * 2</code>. Use them sparingly.</li>
+    <li>A <code>lambda</code> is a one-expression function, useful inline as a callback (see <a href="#lesson-25">Lesson 25</a>). Use <code>def</code> for a named function.</li>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
@@ -571,6 +587,16 @@ total(1, 2, 3)</code></pre></div>
     <figcaption>For <code>def describe(name, age, *args, **kwargs)</code>: positional values fill named parameters first, leftovers go to <code>args</code>, and named extras go to <code>kwargs</code>.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Function declarations aren’t hoisted. Calling a function on a line above its <code>def</code> at module level raises <code>NameError</code>, because the <code>def</code> hasn’t run yet.</p></aside>
+  <h2>Make options keyword-only</h2>
+  <p>Use a bare <code>*</code> to require names for the parameters that follow it. This gives you the readability of a TypeScript options object without creating a separate object at every call site.</p>
+  <pre><code class="language-python">def greet(name: str, *, punctuation: str = "!") -&gt; str:
+    return f"Hello, {name}{punctuation}"
+
+
+print(greet("Ada"))                   # Hello, Ada!
+print(greet("Ada", punctuation="?"))  # Hello, Ada?
+print(greet("Ada", **{"punctuation": "."}))  # Hello, Ada.</code></pre>
+  <p><code>greet("Ada", "?")</code> raises <code>TypeError</code> because the second argument must be named. In a definition, <code>**kwargs</code> <em>collects</em> keyword arguments. In a call, <code>**options</code> <em>unpacks</em> a mapping; its keys must be strings and can’t duplicate arguments you already supplied.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="03-1"><p class="task-text">Write <code>area(width, height=1)</code> and call it once positionally and once with keyword arguments in reverse order.</p>
@@ -653,6 +679,16 @@ label = "big" if n &gt; 10 else "small"</code></pre></div>
     <figcaption><code>list(range(2, 10, 3))</code> is <code>[2, 5, 8]</code>. The next step would be 11, and 10 itself is never produced.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>There’s no <code>++</code> or <code>--</code>. Write <code>i += 1</code>. And <code>&amp;&amp;</code>, <code>||</code>, <code>!</code> are a syntax error: use <code>and</code>, <code>or</code>, <code>not</code>.</p></aside>
+  <h2>Choose what to loop over</h2>
+  <p>Loop directly over values when you only need the values. Use <code>enumerate()</code> when you need a position too, or <code>zip()</code> when pairing two inputs. Reach for <code>range()</code> when the numbers themselves matter, not just to index a list.</p>
+  <pre><code class="language-python">names = ["Ada", "Grace"]
+scores = [8, 10]
+
+for rank, (name, score) in enumerate(zip(names, scores, strict=True), start=1):
+    print(f"{rank}. {name}: {score}")
+
+print(list(range(3, 0, -1)))  # [3, 2, 1]</code></pre>
+  <p><code>zip()</code> supplies a pair; <code>enumerate()</code> adds the rank. The parentheses in the loop unpack that pair. Try deleting the last score: the first pair still prints, then iteration raises <code>ValueError</code>. Use <code>strict=True</code> when dropping an unpaired value would hide a bug.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="04-1"><p class="task-text">FizzBuzz from 1 to 20: print “Fizz” for multiples of 3, “Buzz” for multiples of 5, “FizzBuzz” for both, otherwise the number.</p>
@@ -731,6 +767,19 @@ print(a is b)             # True</code></pre></div>
     <figcaption>Two names, one dict. Changing the list through <code>b</code> changes what <code>a</code> sees, because there’s only one list.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>For lists, <code>x += [1]</code> changes the existing list in place, but <code>x = x + [1]</code> builds a new list and rebinds <code>x</code>. Other names pointing to the old list see the first change, not the second.</p></aside>
+  <h2>Follow an object through a call</h2>
+  <p>A parameter is a local name for the object passed by the caller. That’s why a method can change the caller’s list, but an assignment to the parameter can’t replace it.</p>
+  <pre><code class="language-python">def add_and_rebind(tags: list[str]) -&gt; list[str]:
+    tags.append("python")
+    tags = ["typescript"]
+    return tags
+
+
+original = ["web"]
+result = add_and_rebind(original)
+print(original)  # ['web', 'python']
+print(result)    # ['typescript']</code></pre>
+  <p>Use a return value when callers should decide whether to replace their data. If a function promises not to mutate its inputs, build a new result rather than appending to the input.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="05-1"><p class="task-text">Predict the output, then run it:</p><pre><code class="language-python">def add_item(cart, item):
@@ -780,8 +829,8 @@ items_copy = items[:]           # or list(items)</code></pre></div>
   <ul class="points">
     <li>Mutable: <code>list</code>, <code>dict</code>, <code>set</code> and most objects you create. Immutable: <code>int</code>, <code>float</code>, <code>str</code>, <code>bool</code>, <code>tuple</code>, <code>None</code>.</li>
     <li>“Changing” an immutable value creates a new one: <code>name.upper()</code> returns a new string and leaves <code>name</code> alone.</li>
-    <li>A shallow copy duplicates only the outer container; nested lists and dicts are still shared. <code>copy.deepcopy</code> duplicates everything.</li>
-    <li>A tuple is a read-only list, like <code>readonly [string, number]</code>. Because it can’t change, it can be a dict key; a list can’t.</li>
+    <li>A shallow copy duplicates only the outer container; nested lists and dicts are still shared. <code>copy.deepcopy()</code> recursively copies nested containers.</li>
+    <li>A tuple has fixed slots, like <code>readonly [string, number]</code>, but an object inside it can still be mutable. A tuple can be a dict key only if every element is hashable; a tuple containing a list can’t.</li>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
@@ -802,6 +851,18 @@ items_copy = items[:]           # or list(items)</code></pre></div>
     <figcaption>Appending to <code>shallow["tags"]</code> also changes <code>original["tags"]</code>. The deep copy is fully independent.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Strings look like arrays but are immutable: <code>name[0] = "X"</code> raises <code>TypeError</code>. Build a new string instead: <code>"X" + name[1:]</code>.</p></aside>
+  <h2>Choose what to copy</h2>
+  <p><code>dict.copy()</code> is like TypeScript’s <code>{...obj}</code>: changing a top-level entry affects only the copy, but mutating a nested list affects both. Compare it with a deep copy:</p>
+  <pre><code class="language-python">from copy import deepcopy
+
+original = {"tags": ["web"]}
+shallow = original.copy()
+deep = deepcopy(original)
+
+shallow["tags"].append("python")
+print(original["tags"])  # ['web', 'python']
+print(deep["tags"])      # ['web']</code></pre>
+  <p>If you only plan to edit one nested list, copy that list and keep the rest. Use a deep copy when you need independent nested data and copying the entire structure is appropriate.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="06-1"><p class="task-text">Make a shallow copy of <code>{"title": "Draft", "tags": ["a"]}</code>, append <code>"b"</code> to the copy’s tags, and print the original. Explain what you see.</p>
@@ -866,6 +927,17 @@ a == b</code></pre></div>
     <figcaption>Highlighted rows behave differently in the two languages.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p><code>if items:</code> is false for an empty list. In JavaScript <code>if ([])</code> is true. Python’s version is usually what you meant, so lean on it.</p></aside>
+  <h2>Distinguish missing from falsy</h2>
+  <p>Both Python’s <code>or</code> and JavaScript’s <code>||</code> return an operand rather than a boolean. Use <code>or</code> if all falsy values should trigger the fallback. Use an identity check if only <code>None</code> should trigger it, as with TypeScript’s <code>??</code>.</p>
+  <pre><code class="language-python">retries = 0
+print(retries or 3)                          # 3
+print(retries if retries is not None else 3) # 0
+
+first = ["Ada"]
+second = ["Ada"]
+print(first == second)  # True: equal contents
+print(first is second)  # False: separate objects</code></pre>
+  <p>For a retry setting, <code>0</code> can mean “don’t retry” while <code>None</code> means “use the default.” Use <code>==</code> to compare contents, and save <code>is</code> for identity checks such as <code>value is None</code>.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="07-1"><p class="task-text">Write <code>describe(value)</code> that returns “empty” for falsy values and “has value” otherwise. Try it with <code>0</code>, <code>""</code>, <code>[]</code>, <code>[0]</code> and <code>None</code>.</p>
@@ -915,9 +987,9 @@ def add_tag(tag, tags=None):      # fix
   <h2>What’s different</h2>
   <ul class="points">
     <li>Default values are evaluated once, when the <code>def</code> line runs, not on every call. A mutable default is shared by every call. Use <code>None</code> and create the list inside.</li>
-    <li>A variable created inside an <code>if</code> or <code>for</code> block is still visible after it, like <code>var</code> in old JavaScript.</li>
+    <li><code>if</code> and <code>for</code> do not create scopes. A name assigned inside remains visible afterward, but only if that assignment actually ran.</li>
     <li>Names are looked up in order: Local, Enclosing function, Global (module), Built-in. That’s the LEGB rule.</li>
-    <li>Reading an outer variable needs nothing. Assigning to one needs <code>nonlocal</code> (enclosing function) or <code>global</code> (module).</li>
+    <li>Reading an outer variable needs no declaration. Rebinding an outer name from inside a function needs <code>nonlocal</code> (enclosing function) or <code>global</code> (module). Mutating the object through that name doesn’t.</li>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
@@ -936,6 +1008,22 @@ def add_tag(tag, tags=None):      # fix
     <figcaption>If a name isn’t found in any box, you get a <code>NameError</code>.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Loop variables survive the loop: after <code>for i in range(3):</code>, <code>i</code> is still 2. Don’t reuse the name by accident later in the function.</p></aside>
+  <h2>Give each call its own default</h2>
+  <p>A Python default is stored when Python defines the function. A JavaScript default parameter expression runs at call time instead. If you want a new list for each call that omits the argument, create it inside the function:</p>
+  <pre><code class="language-python">def add_tag(tag: str, tags: list[str] | None = None) -&gt; list[str]:
+    if tags is None:
+        tags = []
+    tags.append(tag)
+    return tags
+
+
+print(add_tag("python"))  # ['python']
+print(add_tag("web"))     # ['web']
+
+existing: list[str] = []
+add_tag("typescript", existing)
+print(existing)  # ['typescript']</code></pre>
+  <p><code>is None</code> preserves a caller’s empty list; <code>tags or []</code> would discard it. And if the name should refer to the same list but its contents should change, <code>append()</code> is enough: you aren’t rebinding the name.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="08-1"><p class="task-text">Reproduce the <code>add_tag</code> bug from the example, then fix it with a <code>None</code> default.</p>
@@ -969,7 +1057,7 @@ show()</code></pre>
 </template>
 
 <!-- ================= SECTION 3 ================= -->
-<template class="lesson" data-n="09" data-section="3" data-title="Classes and methods" data-summary="__init__, an explicit self, properties and inheritance.">
+<template class="lesson" data-n="09" data-section="3" data-title="Classes and methods" data-summary="Instance and class attributes, properties, inheritance, overriding and super().">
   <p class="lead">Classes work much like TypeScript classes. The visible differences are an explicit <code>self</code>, no <code>new</code> keyword, and conventions instead of access modifiers.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">class Account {
@@ -1007,10 +1095,10 @@ print(acct.total)  # 50.0</code></pre></div>
   </div>
   <h2>What’s different</h2>
   <ul class="points">
-    <li><code>__init__</code> is the constructor. You create instances by calling the class: <code>Account("Ada")</code>.</li>
-    <li><code>self</code> is <code>this</code>, written explicitly as the first parameter of every method.</li>
+    <li><code>__init__</code> initializes a new instance, like TypeScript’s constructor body. You create instances by calling the class: <code>Account("Ada")</code>.</li>
+    <li><code>self</code> is <code>this</code>, written explicitly as the first parameter of an instance method.</li>
     <li>There’s no <code>private</code>. A leading underscore, <code>_balance</code>, means “internal, don’t touch from outside” by convention.</li>
-    <li><code>@property</code> turns a method into a getter. Inheritance: <code>class Savings(Account):</code> and <code>super().__init__(owner)</code>.</li>
+    <li><code>@property</code> turns a method into a getter: read <code>acct.total</code>, not <code>acct.total()</code>.</li>
     <li>“Dunder” methods customize behavior: <code>__repr__</code> for debug printing, <code>__eq__</code> for <code>==</code>, <code>__len__</code> for <code>len()</code>. That’s why Python writes <code>len(x)</code> where TypeScript writes <code>x.length</code>: <code>len</code> calls your <code>__len__</code>.</li>
     <li>More dunders: <code>__lt__</code> makes instances sortable with <code>sorted()</code>, <code>__add__</code> defines <code>+</code>, and <code>__iter__</code> makes an object work in a <code>for</code> loop. Defining <code>__eq__</code> makes instances unhashable, so they can’t be dict keys or set members, unless you also define <code>__hash__</code>.</li>
   </ul>
@@ -1028,6 +1116,72 @@ print(acct.total)  # 50.0</code></pre></div>
     <figcaption>When you call <code>acct.deposit(50)</code>, Python passes <code>acct</code> as <code>self</code> automatically.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Forget <code>self</code> in a method definition and you’ll get “deposit() takes 1 positional argument but 2 were given”. The missing argument is the instance itself.</p></aside>
+  <h2>Instance and class attributes</h2>
+  <p><code>self.owner</code> and <code>self._balance</code> belong to one account. An attribute defined directly in the class body, such as <code>currency = "EUR"</code>, belongs to the class (like a TypeScript <code>static</code> field). You can read it as <code>Account.currency</code> or <code>acct.currency</code> if the instance hasn’t set its own value. Put mutable state such as <code>self.transactions = []</code> in <code>__init__</code> if every account needs its own list.</p>
+  <h2>Inheritance and overriding</h2>
+  <p><code>class AuditedAccount(Account):</code> is Python’s <code>class AuditedAccount extends Account</code>. The subclass below keeps the original deposit behavior and also counts deposits. Add this code below the corresponding <code>Account</code> example above.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">class AuditedAccount extends Account {
+  depositCount: number;
+
+  constructor(owner: string) {
+    super(owner);
+    this.depositCount = 0;
+  }
+
+  override deposit(amount: number): void {
+    super.deposit(amount);
+    this.depositCount += 1;
+  }
+}
+
+const audited = new AuditedAccount("Ada");
+const account: Account = audited;
+account.deposit(50);
+console.log(account.total, audited.depositCount); // 50 1</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">from typing import override
+
+
+class AuditedAccount(Account):
+    def __init__(self, owner: str) -&gt; None:
+        super().__init__(owner)
+        self.deposit_count = 0
+
+    @override
+    def deposit(self, amount: float) -&gt; None:
+        super().deposit(amount)
+        self.deposit_count += 1
+
+
+def fund(account: Account, amount: float) -&gt; None:
+    account.deposit(amount)
+
+
+audited = AuditedAccount("Ada")
+fund(audited, 50)
+print(audited.total, audited.deposit_count)  # 50.0 1
+print(isinstance(audited, Account))  # True</code></pre></div>
+  </div>
+  <ul class="points">
+    <li><strong>Inherit:</strong> <code>AuditedAccount</code> doesn’t define <code>total</code>, so it uses the property from <code>Account</code>. A subclass that doesn’t define <code>__init__</code> also inherits it.</li>
+    <li><strong>Override:</strong> defining <code>deposit</code> again changes which method runs. Even though <code>fund</code> accepts an <code>Account</code>, Python calls the method on the actual object. <code>@override</code> is optional; it lets a type checker flag a typo or an incompatible override.</li>
+    <li><strong>Extend:</strong> <code>super().deposit(amount)</code> calls the next implementation, here <code>Account.deposit</code>. A replacement that doesn’t need the original behavior can leave out the call.</li>
+  </ul>
+  <aside class="trap"><strong>TS trap</strong><p>If you write a subclass <code>__init__</code>, Python neither calls the base initializer automatically nor requires you to call it. Forget <code>super().__init__(owner)</code> here and <code>owner</code> and <code>_balance</code> won’t be set, so the first deposit will raise <code>AttributeError</code>.</p></aside>
+  <p>Unlike TypeScript, Python allows multiple base classes. With more than one, <code>super()</code> follows the method resolution order (MRO), which you can inspect with <code>SomeClass.mro()</code>.</p>
+  <p>Inherit when the subclass can stand in for the base class: an <code>AuditedAccount</code> is an <code>Account</code>. If a report merely uses an account, give the report an <code>Account</code> attribute instead (composition). If callers only care that an object provides certain methods or attributes, see <a href="#lesson-13">Lesson 13 on protocols</a>.</p>
+  <h2>Alternate constructors</h2>
+  <p>An instance method receives <code>self</code>; a <code>@classmethod</code> receives the class as <code>cls</code>. Use it for named alternate constructors. Unlike hard-coding a class name, calling <code>cls(...)</code> also works when a subclass inherits the method and accepts the same initializer arguments. A <code>@staticmethod</code> receives neither <code>self</code> nor <code>cls</code>; often a module-level function is simpler.</p>
+  <pre><code class="language-python">class Temperature:
+    def __init__(self, celsius: float) -&gt; None:
+        self.celsius = celsius
+
+    @classmethod
+    def from_fahrenheit(cls, fahrenheit: float) -&gt; "Temperature":
+        return cls((fahrenheit - 32) * 5 / 9)
+
+
+print(Temperature.from_fahrenheit(68).celsius)  # 20.0</code></pre>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="09-1"><p class="task-text">Add <code>withdraw(amount)</code> to <code>Account</code>. It raises <code>ValueError</code> when the balance is too low.</p>
@@ -1042,6 +1196,7 @@ print(acct.total)  # 50.0</code></pre></div>
         return f"Account(owner={self.owner!r}, balance={self._balance})"</code></pre></details>
       <label class="done"><input type="checkbox"> Done</label></li>
     <li class="task" data-task="09-3"><p class="task-text">Create <code>SavingsAccount(Account)</code> with an <code>add_interest(rate)</code> method, where 0.05 means 5%.</p>
+      <details><summary>Hint</summary><p>There’s no extra state to initialize, so inherit <code>__init__</code> as-is. Reuse <code>self.total</code> and <code>self.deposit(...)</code> rather than changing <code>_balance</code> directly.</p></details>
       <details><summary>Solution</summary><pre><code class="language-python">class SavingsAccount(Account):
     def add_interest(self, rate: float) -&gt; None:
         self.deposit(self.total * rate)
@@ -1109,6 +1264,23 @@ class User:
     <figcaption>Add <code>order=True</code> to also get <code>&lt;</code> and <code>&gt;</code>, compared field by field.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Two dataclass instances with the same fields are <code>==</code>, unlike two TS objects with the same shape. Use <code>is</code> if you need “same instance”.</p></aside>
+  <h2>Give each instance its own values</h2>
+  <p>A default factory is a callable, not a value. Pass <code>list</code> rather than <code>list()</code>: the generated initializer calls it each time a caller leaves out the field.</p>
+  <pre><code class="language-python">from dataclasses import asdict, dataclass, field
+
+
+@dataclass
+class Project:
+    name: str
+    tags: list[str] = field(default_factory=list)
+
+
+course = Project("Course")
+notes = Project("Notes")
+course.tags.append("python")
+print(asdict(course))  # {'name': 'Course', 'tags': ['python']}
+print(notes.tags)      # []</code></pre>
+  <p><code>frozen=True</code> blocks reassigning fields, but it doesn’t freeze a list inside the instance. Use an immutable field type such as <code>tuple[str, ...]</code> when the contents should be fixed too. Dataclasses generate code from annotations; they don’t validate incoming values. Use <a href="#lesson-13">Pydantic</a> for that boundary.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="10-1"><p class="task-text">Create a <code>Book</code> dataclass with <code>title</code>, <code>author</code>, <code>year</code> and a <code>tags</code> list that defaults to empty.</p>
@@ -1205,7 +1377,45 @@ def area(shape: Circle | Rect) -&gt; float:
     </svg></div>
     <figcaption>Cases are tried in order. The first one whose pattern fits runs, and its pattern variables (<code>w</code>, <code>h</code>) are filled in.</figcaption>
   </figure>
-  <aside class="trap"><strong>TS trap</strong><p>Nothing forces a <code>match</code> to be exhaustive at runtime. If no case fits, it just does nothing and the function returns <code>None</code>. Add a <code>case _:</code> that raises.</p></aside>
+  <aside class="trap"><strong>TS trap</strong><p>Nothing forces a <code>match</code> to be exhaustive at runtime. If no case fits, execution continues after the <code>match</code>. In <code>area()</code> above, the final <code>case _:</code> raises instead of letting the function fall through and return <code>None</code>.</p></aside>
+  <h2>Enum members, names and values</h2>
+  <p>Use an enum when you want a closed set of named choices at runtime. The member is <code>Status.DRAFT</code>, its name is <code>"DRAFT"</code>, and its value is <code>"draft"</code>. Look up by value with parentheses or by name with brackets.</p>
+  <pre><code class="language-python">from enum import Enum
+
+
+class Status(Enum):
+    DRAFT = "draft"
+    PUBLISHED = "published"
+
+
+def can_edit(status: Status) -&gt; bool:
+    match status:
+        case Status.DRAFT:
+            return True
+        case Status.PUBLISHED:
+            return False
+
+
+status = Status("draft")
+print(status.name, status.value)      # DRAFT draft
+print(Status["DRAFT"] is status)      # True
+print(can_edit(status))               # True</code></pre>
+  <p><code>Status("archived")</code> raises <code>ValueError</code>; <code>Status["ARCHIVED"]</code> raises <code>KeyError</code>. At a JSON boundary, read the string into an enum member and write <code>status.value</code> back out. For a choice that only needs static checking, compare <code>Literal</code> in <a href="#lesson-14">Lesson 14</a>.</p>
+  <h2>Capture values and guard a case</h2>
+  <p>A bare name in a pattern captures a value: <code>case draft:</code> binds <code>draft</code>, it doesn’t compare with a variable of that name. Use a literal or a qualified member such as <code>case Status.DRAFT:</code> when you mean a specific value. A guard checks an extra condition <em>after</em> the pattern matches.</p>
+  <pre><code class="language-python">def describe(event: dict[str, object]) -&gt; str:
+    match event:
+        case {"type": "click", "count": int(n)} if n &gt; 1:
+            return f"{n} clicks"
+        case {"type": "click"}:
+            return "Click event"
+        case _:
+            return "Unknown event"
+
+
+print(describe({"type": "click", "count": 3, "source": "menu"}))  # 3 clicks
+print(describe({"type": "click", "count": 1}))  # Click event</code></pre>
+  <p>A mapping pattern requires the listed keys but allows extras. A sequence pattern such as <code>["go", direction]</code> requires exactly two elements unless you add a starred pattern. Put more specific cases first.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="11-1"><p class="task-text">Add a <code>Triangle(base, height)</code> dataclass and support it in <code>area()</code>.</p>
@@ -1295,6 +1505,21 @@ print(user.name)  # narrowed to User</code></pre></div>
     <figcaption>Everything after the check sees only <code>User</code>, so you can use <code>user.name</code> without extra guards.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p><code>if not user:</code> also rejects valid falsy values like 0, <code>""</code> and empty lists. When you mean “missing”, write <code>if user is None:</code>.</p></aside>
+  <h2>Nullable is not the same as omittable</h2>
+  <p><code>str | None</code> allows a value of <code>None</code>. It doesn’t let the caller omit an argument. A default makes the argument omittable. The same distinction matters in dictionaries: <code>dict.get()</code> treats an absent key like a stored <code>None</code> unless you supply a different default.</p>
+  <pre><code class="language-python">def label(name: str | None = None) -&gt; str:
+    if name is None:
+        return "(unnamed)"
+    return f"[{name}]"
+
+
+print(label())      # (unnamed)
+print(label(None))  # (unnamed)
+print(label(""))    # []
+
+record = {"name": None}
+print("name" in record, "email" in record)  # True False</code></pre>
+  <p>Remove <code>= None</code> and <code>label(None)</code> still works, but <code>label()</code> raises <code>TypeError</code>. Test membership when an absent key and an explicitly null value mean different things.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="12-1"><p class="task-text">Write <code>first_word(text: str) -&gt; str | None</code> that returns <code>None</code> for blank text.</p>
@@ -1373,6 +1598,23 @@ print(user.age)  # 36, converted to int</code></pre></div>
     <figcaption>Validate once at the edge of your program (API input, files, config), then work with typed objects everywhere else.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>On a plain class or dataclass, <code>age: int</code> won’t stop <code>age="abc"</code> at runtime. Only a validation library like Pydantic enforces types on incoming data.</p></aside>
+  <h2>Validate at the boundary</h2>
+  <p>A protocol describes what your own code needs, like a TypeScript interface. Pydantic checks input values at runtime, like Zod. Choose strictness at the point you validate: an environment variable may legitimately be text, while an API field might need an actual JSON number.</p>
+  <pre><code class="language-python">from pydantic import BaseModel, ValidationError
+
+
+class Settings(BaseModel):
+    retries: int
+
+
+raw = {"retries": "3"}
+print(Settings.model_validate(raw).model_dump())  # {'retries': 3}
+
+try:
+    Settings.model_validate(raw, strict=True)
+except ValidationError as exc:
+    print(exc.errors()[0]["loc"])  # ('retries',)</code></pre>
+  <p>Here the first call parses the value and the second rejects it. <code>model_dump()</code> converts validated data back to a dict; <code>model_dump_json()</code> produces JSON text. Neither a protocol nor an annotation alone will perform that initial validation.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="13-1"><p class="task-text">Define a <code>Protocol</code> called <code>Sized</code> with a <code>size(self) -&gt; int</code> method, and two unrelated classes that satisfy it without inheriting from it.</p>
@@ -1499,6 +1741,25 @@ class Box[T]:
     <figcaption>Almost every TypeScript type has a Python spelling. The highlighted rows look alike but differ: <code>object</code>, not <code>Any</code>, is the safe “I don’t know yet” type.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>In TypeScript a type error stops the build. In Python, type hints are never checked when the code runs: a function typed <code>order: Literal["asc", "desc"]</code> happily accepts <code>"up"</code>, and <code>python app.py</code> runs no matter what mypy says. Run mypy in CI so errors can’t be merged, validate data at the edges of your program, and end a <code>match</code> over a union with <code>case _: assert_never(order)</code>, so mypy tells you when a new case isn’t handled.</p></aside>
+  <h2>Check that every case is handled</h2>
+  <p><code>assert_never()</code> plays the role of a TypeScript <code>never</code> check. The type checker accepts the call only if narrowing has ruled out every possible value. If execution reaches it anyway, it raises <code>AssertionError</code>.</p>
+  <pre><code class="language-python">from typing import Literal, assert_never
+
+type Order = Literal["asc", "desc"]
+
+
+def arrow(order: Order) -&gt; str:
+    match order:
+        case "asc":
+            return "up"
+        case "desc":
+            return "down"
+        case _:
+            assert_never(order)
+
+
+print(arrow("desc"))  # down</code></pre>
+  <p>Save this as <code>order.py</code> and run <code>uv run mypy --strict order.py</code>. Then add <code>"none"</code> to the alias without adding a case: mypy flags the call to <code>assert_never()</code>. Parse or validate external input before calling this function; the alias itself doesn’t reject bad input.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="14-1"><p class="task-text">Write a generic <code>group_by(items, key)</code>, like lodash’s <code>groupBy</code>, typed so that mypy knows <code>group_by(["a", "bb"], len)</code> is a <code>dict[int, list[str]]</code>.</p>
@@ -1605,6 +1866,13 @@ x, y = point</code></pre></div>
     <figcaption>Slices work the same on lists, tuples and strings. Out-of-range slices don’t raise, they just return fewer items.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p><code>nums.sort()</code> returns <code>None</code>, so <code>result = nums.sort()</code> leaves you with <code>None</code>. In JS, <code>sort()</code> returns the array.</p></aside>
+  <h2>Sort by a key, not a comparator</h2>
+  <p>TypeScript’s <code>sort((a, b) =&gt; a.score - b.score)</code> compares pairs. Python’s <code>key=</code> extracts a value from each item once and sorts by that value. Equal keys retain their original order.</p>
+  <pre><code class="language-python">scores = [("Ada", 8), ("Grace", 10), ("Lin", 8)]
+ranked = sorted(scores, key=lambda entry: entry[1], reverse=True)
+print(ranked[:2])  # [('Grace', 10), ('Ada', 8)]
+print(scores[0])   # ('Ada', 8)</code></pre>
+  <p>Use <code>sorted()</code> to keep the original order available. Here the slice excludes index 2 and copies the selected slots, not the objects inside them.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="15-1"><p class="task-text">Write <code>swap_ends(items)</code> that returns a new list with the first and last items swapped. The input must not change.</p>
@@ -1674,6 +1942,13 @@ f"Total: {price:.2f}"</code></pre></div>
     <figcaption>The “é” takes two bytes in UTF-8. Files opened in text mode do this conversion for you.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p><code>", ".join([1, 2, 3])</code> raises <code>TypeError</code>, because Python won’t turn numbers into strings for you. Write <code>", ".join(str(n) for n in nums)</code>.</p></aside>
+  <h2>Decode bytes before working with text</h2>
+  <p>A Python <code>str</code> holds Unicode text. UTF-8 represents that text as bytes for storage or transfer, so the length can change. This is like using <code>TextEncoder</code> and <code>TextDecoder</code> in TypeScript.</p>
+  <pre><code class="language-python">text = "café"
+payload = text.encode("utf-8")
+print(len(text), len(payload))  # 4 5
+print(payload.decode("utf-8"))  # café</code></pre>
+  <p>Use the encoding specified by the source. Invalid UTF-8 raises <code>UnicodeDecodeError</code> by default; don’t silently discard bytes to make a decode succeed.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="16-1"><p class="task-text">Write <code>slugify(text)</code> so that <code>slugify("Hello World, Python!")</code> returns <code>"hello-world-python"</code>.</p>
@@ -1744,6 +2019,17 @@ unique = {1, 2, 2, 3}           # {1, 2, 3}</code></pre></div>
     <figcaption>Checking <code>x in some_set</code> is very fast even for millions of items, much faster than <code>x in some_list</code>.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p><code>{}</code> is an empty dict, not an empty set. Write <code>set()</code> for an empty set.</p></aside>
+  <h2>Distinguish reading from inserting</h2>
+  <p>Unlike a TypeScript <code>Map.get()</code>, Python’s <code>d[key]</code> normally raises if a key is missing. A <code>defaultdict</code> changes that operation: indexing a missing key calls a factory and inserts the result. <code>get()</code> still only reads.</p>
+  <pre><code class="language-python">from collections import defaultdict
+
+by_team: defaultdict[str, list[str]] = defaultdict(list)
+by_team["web"].append("Ada")
+print(by_team.get("data"))  # None
+print("data" in by_team)    # False
+print(by_team["data"])      # []
+print("data" in by_team)    # True</code></pre>
+  <p>Index when you intend to create a bucket, as in the first append. Use <code>get()</code> or <code>in</code> if you don’t want a read to change the mapping.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="17-1"><p class="task-text">Count how often each word appears in a sentence, first with a plain dict, then with <code>Counter</code>.</p>
@@ -1830,6 +2116,21 @@ finally:
     <figcaption>Keep the <code>try</code> block small: only the line that can fail. Put the follow-up work in <code>else</code>.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>A bare <code>except:</code> catches everything, including Ctrl+C. Always name the exception, and use <code>except Exception:</code> only at the very top of a program.</p></aside>
+  <h2>Keep the try block narrow</h2>
+  <p>Catch the error from the operation you expect to fail, not every line that follows. The <code>else</code> clause can use the result without routing later exceptions through the same handler.</p>
+  <pre><code class="language-python">def parse_port(raw: str) -&gt; int:
+    try:
+        port = int(raw)
+    except ValueError as exc:
+        raise ValueError("Port must be a whole number") from exc
+    else:
+        if not 1 &lt;= port &lt;= 65535:
+            raise ValueError("Port must be between 1 and 65535")
+        return port
+
+
+print(parse_port("8080"))  # 8080</code></pre>
+  <p>Try <code>"web"</code> and <code>"0"</code>: the first error keeps the failed conversion as its cause; the second reports a range problem without mislabeling it as a parse failure.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="18-1"><p class="task-text">Write <code>safe_divide(a, b)</code> that returns <code>None</code> instead of crashing when <code>b</code> is 0.</p>
@@ -1894,7 +2195,7 @@ if __name__ == "__main__":
   <h2>What’s different</h2>
   <ul class="points">
     <li>A folder with an <code>__init__.py</code> file is a package, like a folder with an <code>index.ts</code>. Re-export names there to shorten imports.</li>
-    <li>Imports are absolute from the project root by default. Inside a package you can use relative imports: <code>from .math_tools import double</code>.</li>
+    <li>Imports without a leading dot are absolute and use Python’s module search path. Inside a package you can use relative imports: <code>from .math_tools import double</code>.</li>
     <li>Names starting with <code>_</code> are internal by convention. Nothing stops an import, but tools and readers treat them as private.</li>
     <li>Importing a module runs it from top to bottom. Two modules that import each other at the top, which happens easily with TypeScript-style barrel files, fail with <em>cannot import name … (most likely due to a circular import)</em>. Move the shared code into a third module, or import inside the function that needs it.</li>
     <li><code>if __name__ == "__main__":</code> runs code only when the file is executed directly, not when it’s imported. Use it for demos and scripts.</li>
@@ -1910,6 +2211,9 @@ if __name__ == "__main__":
     <figcaption>The import path follows the folder path: <code>shop/pricing.py</code> is <code>shop.pricing</code>.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Don’t name your own file after a standard module, like <code>json.py</code>, <code>math.py</code> or <code>random.py</code>. Your file shadows the real one and imports break in confusing ways.</p></aside>
+  <h2>Run a package module by name</h2>
+  <p>From the directory containing a package, run <code>uv run python -m tools.report</code> to execute <code>tools/report.py</code> with package context. Inside the module, <code>from .formatting import title</code> then resolves to <code>tools/formatting.py</code>. Running the file by path instead can leave Python without that package context, and the relative import fails.</p>
+  <p>Put executable work in a <code>main()</code> function and call it under the <code>__main__</code> check. Then importing <code>tools.report</code> in a test defines the function without printing anything or starting a job. Absolute imports resolve on Python’s module search path, not against a TypeScript-style project alias.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="19-1"><p class="task-text">Create the <code>shop</code> package from the diagram with an <code>apply_discount(price, percent)</code> function, and call it from <code>main.py</code>.</p>
@@ -1976,6 +2280,9 @@ uvx some-tool</code></pre></div>
     <figcaption>uv also installs Python itself: <code>uv python install 3.13</code>, much like nvm.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Running <code>pip install</code> outside an environment installs into the system Python, and many systems block it. Always work inside a project with its own environment.</p></aside>
+  <h2>Change dependencies or reproduce them</h2>
+  <p>Use <code>uv add</code> when changing what the project needs, and <code>uv sync</code> when installing what’s already declared. <code>uv add --dev pytest</code> records pytest as a development dependency; importing it in your app would make the app depend on a tool that production may not install.</p>
+  <p>In CI, use <code>uv sync --locked</code> to fail if <code>uv.lock</code> is out of date rather than silently resolving a new environment. Keep <code>pyproject.toml</code> and <code>uv.lock</code> in the same change when you add or update a dependency.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="20-1"><p class="task-text">Install uv, run <code>uv init hello-uv</code>, and run the generated <code>main.py</code> with <code>uv run main.py</code>.</p>
@@ -2039,6 +2346,12 @@ total(["1.5", "2"])
     <figcaption>Run these in this order before every commit, or wire them into a pre-commit hook or your CI.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>A Python program with type errors still runs. Unlike <code>tsc</code>, nothing stops you unless you run the checker, so make it part of your routine.</p></aside>
+  <h2>Know which check failed</h2>
+  <p>Run these from your project directory. The checks are separate for the same reason Prettier, ESLint and <code>tsc</code> are separate: they answer different questions.</p>
+  <pre><code>uv run ruff format --check app.py
+uv run ruff check app.py
+uv run mypy app.py</code></pre>
+  <p>The first checks layout without rewriting the file. The second catches lint issues such as unused imports. The third catches type mismatches such as passing a string to an argument annotated <code>int</code>. If formatting is the only failure, run <code>uv run ruff format app.py</code> to apply it.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="21-1"><p class="task-text">Write a function with a deliberate type error, run <code>uv run mypy --strict .</code>, read the message, and fix the code.</p>
@@ -2121,6 +2434,17 @@ def test_rejects_empty_text():
     <figcaption>pytest matches the parameter name <code>account</code> to the fixture with the same name and calls it before each test.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>A test function without the <code>test_</code> prefix never runs, and pytest won’t warn you. If your test count looks low, check the names.</p></aside>
+  <h2>Combine a fixture with a table of cases</h2>
+  <p>Use a fixture to provide setup and <code>parametrize</code> to vary inputs, like <code>it.each</code> in Vitest. Here <code>tmp_path</code> gives each test case its own directory, so the cases can reuse the same filename.</p>
+  <pre><code class="language-python">import pytest
+
+
+@pytest.mark.parametrize("text", ["hello", "café"])
+def test_text_round_trip(tmp_path, text):
+    path = tmp_path / "message.txt"
+    path.write_text(text, encoding="utf-8")
+    assert path.read_text(encoding="utf-8") == text</code></pre>
+  <p>Save this as <code>test_text.py</code> and run <code>uv run pytest test_text.py -v</code>. You’ll see two separate test cases, so a failure tells you which input to investigate.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="22-1"><p class="task-text">Write tests for your <code>slugify</code> from lesson 16, including one parametrized test with at least three cases.</p>
@@ -2241,6 +2565,19 @@ def test_report(fake_fetch):
     <figcaption><code>from weather_api import fetch_temperature</code> gives <code>report.py</code> its own name for the function. Patch the name that the code under test looks up.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p><code>vi.mock("./weatherApi")</code> replaces the module for every file that imports it. <code>patch("weather_api.fetch_temperature")</code> only rebinds the name inside <code>weather_api</code>. If <code>report.py</code> did <code>from weather_api import fetch_temperature</code>, it still holds the real function, and your test quietly calls the network. Patch where the name is looked up: <code>patch("report.fetch_temperature")</code>.</p></aside>
+  <h2>Use a mock with a real signature</h2>
+  <p>If you just need a predictable answer, a small fake is often easiest to read. If the interaction itself matters, an autospecced mock lets you inspect the call and catches arguments the real function wouldn’t accept.</p>
+  <pre><code class="language-python">from unittest.mock import create_autospec
+
+
+def lookup(code: str, *, locale: str) -&gt; str:
+    return f"{code}: {locale}"
+
+
+fake_lookup = create_autospec(lookup, return_value="Ready")
+print(fake_lookup("status", locale="en"))  # Ready
+fake_lookup.assert_called_once_with("status", locale="en")</code></pre>
+  <p>Try calling <code>fake_lookup("status", "en")</code>. It raises <code>TypeError</code> because <code>locale</code> is keyword-only. Autospec checks the calling convention, not the annotated argument types.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="23-1"><p class="task-text">Test a <code>checkout(total, gateway)</code> function by passing a <code>Mock</code> as the gateway: check the result, check that <code>charge</code> got the amount in cents, and simulate a declined card with <code>side_effect</code>.</p>
@@ -2339,6 +2676,9 @@ def test_twenty_degrees_is_warm(monkeypatch):
     <figcaption>The same failure in both languages. In Python, start reading at the bottom: the error, and just above it the line that raised it.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Years of JavaScript train you to look at the top of a stack trace. In Python the top is the oldest call, usually your script’s entry point or a framework you didn’t write. Scroll to the bottom first: the last line is the error, and the frame right above it is where it happened.</p></aside>
+  <h2>Inspect the failing frame and its caller</h2>
+  <p>Start a failing test with <code>uv run pytest -x --pdb</code>. At <code>(Pdb)</code>, run <code>where</code> for the stack, <code>list</code> for nearby source, and <code>p value</code> for a suspect local variable. Use <code>up</code> to inspect the caller and <code>down</code> to return to the failing frame. These are the terminal equivalents of the call-stack and variables panes in VS Code.</p>
+  <p>If the bad value came from the caller, fix the code that produced it rather than masking it at the crash site. Restart the test to verify the fix; editing a variable in the debugger only changes that running process.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="24-1"><p class="task-text">The exercise file includes the traceback that <code>order_total</code> produces. Read it from the bottom up, find the line that fails, and fix it so prices with decimals work.</p>
@@ -2420,6 +2760,13 @@ oldest = max(users, key=lambda u: u.age)</code></pre></div>
     <figcaption>Read it as “give me <code>p * 1.2</code> for each <code>p</code> in <code>prices</code>, if <code>p &lt; 30</code>”. The filter runs before the expression, even though it’s written last.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>The order is the reverse of a TS chain: the output comes first and the filter comes last. When a comprehension reads awkwardly, say it out loud in that order.</p></aside>
+  <h2>Separate filtering from transforming</h2>
+  <p>The <code>if</code> after <code>for</code> drops items, like <code>.filter()</code>. A conditional expression <em>before</em> <code>for</code> keeps every item and decides what value to return, like a ternary inside <code>.map()</code>.</p>
+  <pre><code class="language-python">scores = [3, 8, 10]
+print([score for score in scores if score &gt;= 8])  # [8, 10]
+print(["pass" if score &gt;= 8 else "retry" for score in scores])
+# ['retry', 'pass', 'pass']</code></pre>
+  <p>Pick the form by asking whether the result should have fewer elements. If you need to skip and transform items with several rules, a loop gives each rule a place to read and debug.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="25-1"><p class="task-text">Build a list of the squares of the even numbers from 1 to 20.</p>
@@ -2493,6 +2840,15 @@ print(next(squares))  # 0</code></pre></div>
     <figcaption>Between values the generator is paused, keeping its local variables. A <code>for</code> loop simply calls <code>next()</code> for you until the generator ends.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>A generator can only be consumed once. A second <code>for</code> loop over the same generator gets nothing. Call the function again, or use <code>list()</code> if you really need to reuse the values.</p></aside>
+  <h2>Pull one item at a time</h2>
+  <p>A list is iterable; you can get a fresh iterator from it each time. An iterator remembers its position, just like the object returned by a JavaScript generator. <code>next()</code> advances it; a <code>for</code> loop continues from wherever it left off.</p>
+  <pre><code class="language-python">numbers = [2, 3, 4]
+squares = (number ** 2 for number in numbers)
+print(next(squares))  # 4
+print(list(squares))  # [9, 16]
+print(list(squares))  # []
+print(list(numbers))  # [2, 3, 4]</code></pre>
+  <p>This is why you can pass a generator to <code>sum()</code> without storing intermediate values, but can’t sum the same generator twice. <code>next(squares, None)</code> returns the default on exhaustion; plain <code>next(squares)</code> raises <code>StopIteration</code>.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="26-1"><p class="task-text">Write a generator <code>evens(limit)</code> that yields 0, 2, 4… up to and including <code>limit</code>.</p>
@@ -2584,6 +2940,30 @@ add(2, 3)  # prints "calling add", returns 5</code></pre></div>
     <figcaption>The name <code>add</code> now points to the wrapper, which keeps a reference to the original function and calls it.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Forget the <code>return</code> in <code>return fn(*args, **kwargs)</code> and every decorated function quietly returns <code>None</code>.</p></aside>
+  <h2>Separate definition time from call time</h2>
+  <p>A decorator receives the function when Python defines it, often while importing the module. The wrapper runs later on each call. Think of it as <code>const greet = trace(originalGreet)</code>, not a hook that only runs on the first invocation.</p>
+  <pre><code class="language-python">from functools import wraps
+
+
+def trace(fn):
+    print(f"Wrapping {fn.__name__}")
+
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        print(f"Calling {fn.__name__}")
+        return fn(*args, **kwargs)
+
+    return wrapper
+
+
+@trace
+def greet(name: str) -&gt; str:
+    return f"Hello, {name}"
+
+
+print(greet("Ada"))
+print(greet("Grace"))</code></pre>
+  <p>Expect one <code>Wrapping greet</code> and two <code>Calling greet</code> lines. Keep per-call work inside the wrapper; put one-time registration outside it.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="27-1"><p class="task-text">Write a <code>@timed</code> decorator that prints how long the function took.</p>
@@ -2683,6 +3063,26 @@ with timer("load"):
     <figcaption>After cleanup, the error keeps propagating unless the context manager chooses to swallow it.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>In a <code>@contextmanager</code>, put the cleanup inside <code>finally</code>. Without it, an exception in the <code>with</code> body skips your cleanup code.</p></aside>
+  <h2>Watch cleanup happen on failure</h2>
+  <p>In a generator-based context manager, <code>yield</code> hands a value to <code>as</code>. If the block raises, the error is thrown back at the <code>yield</code>, so <code>finally</code> can clean up without swallowing the error.</p>
+  <pre><code class="language-python">from contextlib import contextmanager
+
+
+@contextmanager
+def label_section():
+    print("Enter")
+    try:
+        yield "report"
+    finally:
+        print("Exit")
+
+
+try:
+    with label_section() as section:
+        raise ValueError(f"Invalid {section}")
+except ValueError as exc:
+    print(exc)</code></pre>
+  <p>The order is <code>Enter</code>, <code>Exit</code>, then <code>Invalid report</code>. In a class-based manager, <code>__exit__</code> receives the exception details and a truthy return suppresses it. Don’t suppress failures just to handle cleanup.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="28-1"><p class="task-text">Copy <code>input.txt</code> to <code>output.txt</code> in uppercase, using a single <code>with</code> statement for both files.</p>
@@ -2774,6 +3174,26 @@ print(asyncio.run(fetch_all(["https://example.com"])))</code></pre></div>
     <figcaption>While one request waits for the network, the event loop runs the others. The total is about as long as the slowest one.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>In JavaScript a promise starts running as soon as you create it. In Python, calling an async function without <code>await</code> (or <code>create_task</code>) does nothing except create a coroutine object and a warning.</p></aside>
+  <h2>Choose sequential awaits or overlapping tasks</h2>
+  <p>Two consecutive <code>await</code> calls wait one after the other. To overlap independent waits, hand both coroutine objects to <code>asyncio.gather()</code>. The result order matches the argument order, not the finish order.</p>
+  <pre><code class="language-python">import asyncio
+
+
+async def fetch_label(label: str, delay: float) -&gt; str:
+    await asyncio.sleep(delay)
+    return label
+
+
+async def main() -&gt; None:
+    labels = await asyncio.gather(
+        fetch_label("slow", 0.02),
+        fetch_label("fast", 0.01),
+    )
+    print(labels)  # ['slow', 'fast']
+
+
+asyncio.run(main())</code></pre>
+  <p>If the second operation needs the first result, use two awaits instead. For concurrent work that should cancel its siblings on failure, see <code>TaskGroup</code> in <a href="#lesson-30">Lesson 30</a>.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="29-1"><p class="task-text">Write <code>async def say_after(text, seconds)</code> that sleeps and then prints. Run three of them at once with <code>gather</code> and time the total.</p>
@@ -2866,6 +3286,12 @@ if __name__ == "__main__":
     <figcaption>Highlighted rows are the ones Node developers don’t have to think about.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>In Node, <code>count += 1</code> can never be interrupted, because only one thread runs your code. In Python it’s three steps (read, add, write), and another thread can run between them. Eight threads each adding 10,000 to a shared counter can end below 80,000, and only sometimes, which makes the bug hard to catch. Put a <code>threading.Lock</code> around any state that more than one thread changes.</p></aside>
+  <h2>Choose async, threads or processes</h2>
+  <ul class="points">
+    <li><strong>Async:</strong> use an async client when a task spends most of its time waiting on I/O and the library can yield to the event loop.</li>
+    <li><strong>Threads:</strong> use <code>asyncio.to_thread()</code> for a blocking I/O function called from async code. Prefer workers that return results instead of writing to shared data. When threads do share state, protect the entire read-modify-write operation with the same lock.</li>
+    <li><strong>Processes:</strong> use a process pool for sufficiently expensive CPU-heavy Python work. Define the worker at module level and pass data it can serialize; startup and transfer can cost more than the work for small inputs.</li>
+  </ul>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="30-1"><p class="task-text">Download six URLs with a blocking <code>fetch()</code> in a <code>ThreadPoolExecutor</code>, so they take about 0.3 seconds instead of 1.8, and return the pages in order.</p>
@@ -2970,6 +3396,15 @@ print(root.find("title").text, root.get("year"))  # Dune 1965</code></pre>
     <figcaption>Once data is loaded, you work with ordinary Python objects, so everything from the earlier lessons applies.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>JSON object keys are always strings. <code>json.loads(json.dumps({1: "a"}))</code> gives back <code>{"1": "a"}</code>, and looking up <code>[1]</code> raises <code>KeyError</code>.</p></aside>
+  <h2>Parse a file format, then convert its fields</h2>
+  <p>Don’t split CSV with <code>line.split(",")</code>: a field can contain a comma inside quotes. Let the CSV reader handle quoting, then convert the fields whose meaning your app knows.</p>
+  <pre><code class="language-python">import csv
+from io import StringIO
+
+source = StringIO('name,quantity\n"Pens, blue",3\n')
+for row in csv.DictReader(source):
+    print(row["name"], int(row["quantity"]))  # Pens, blue 3</code></pre>
+  <p><code>StringIO</code> lets you try the example without a file. For a real file, use <code>open(path, encoding="utf-8", newline="")</code> in a <code>with</code> block so the CSV reader handles the line endings and Python closes the file.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="31-1"><p class="task-text">Read a JSON list of products (each with <code>name</code> and <code>price</code>) and write the ones over 20 to <code>expensive.json</code>.</p>
@@ -3062,6 +3497,15 @@ sent.isoformat()
     <figcaption>Highlighted rows look alike but count differently: seconds instead of milliseconds, months from 1, weeks from Monday.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>JavaScript timestamps are milliseconds and Python’s are seconds. <code>datetime.fromtimestamp(1774744200000)</code> doesn’t mean 2026: it’s about 56,000 years from now, so Python raises <code>ValueError: year 58209 is out of range</code>. Divide a <code>Date.now()</code> value by 1000 first, and multiply by 1000 before sending one back.</p></aside>
+  <h2>Convert an instant without changing it</h2>
+  <p>Use <code>astimezone()</code> to display the same instant in another zone, like formatting a JavaScript <code>Date</code> with a different <code>timeZone</code>. <code>replace(tzinfo=...)</code> changes the zone label without adjusting the clock reading; it is not a conversion.</p>
+  <pre><code class="language-python">from datetime import UTC, datetime, timezone, timedelta
+
+instant = datetime.fromisoformat("2026-03-29T10:00:00Z")
+local = instant.astimezone(timezone(timedelta(hours=2)))
+print(local.isoformat())  # 2026-03-29T12:00:00+02:00
+print(local.astimezone(UTC) == instant)  # True</code></pre>
+  <p>The example uses a fixed offset to make the calculation visible. Use an IANA zone like <code>ZoneInfo("Europe/Madrid")</code> for a real place, since its offset can change through the year.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="32-1"><p class="task-text">Turn what a JavaScript front end sends into aware UTC datetimes: an ISO string such as <code>"2026-03-29T00:30:00Z"</code> (rejecting strings without a zone), and a <code>Date.now()</code> millisecond timestamp.</p>
@@ -3155,6 +3599,9 @@ def create_item(item: Item) -&gt; Item:
     <figcaption>Invalid input never reaches your function, so the function body can trust its arguments.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Inside an <code>async def</code> route, a blocking call (a slow library, <code>time.sleep</code>) freezes the whole server. If a route uses blocking code, declare it with plain <code>def</code>, and FastAPI runs it in a thread pool.</p></aside>
+  <h2>Read the request from the signature</h2>
+  <p>Unlike Express, you don’t need to pick fields from <code>req.params</code> and <code>req.query</code> yourself. A parameter matching a placeholder in the route comes from the path. A scalar parameter that isn’t in the path usually comes from the query string. A Pydantic model parameter usually comes from the request body.</p>
+  <p>For <code>def list_notes(user_id: int, limit: int = 10)</code> on <code>/users/{user_id}/notes</code>, <code>/users/3/notes?limit=2</code> passes <code>3</code> and <code>2</code> as integers. Omitting the query parameter uses <code>10</code>. With <code>?limit=all</code>, FastAPI rejects the request before calling the function. Use <code>HTTPException</code> when the request parses but the application can’t fulfill it, such as when user 3 doesn’t exist.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="33-1"><p class="task-text">Add <code>GET /hello/{name}</code> that returns <code>{"message": "Hello, Ada"}</code>, then try it in <code>/docs</code>.</p>
@@ -3274,6 +3721,9 @@ with Session(engine) as session:
     <figcaption>Without a transaction, a crash between the two steps would make 50 disappear. With one, the database never sees half a transfer.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Forget to commit and your changes vanish when the connection closes, with no error. Use <code>with conn:</code> or call <code>session.commit()</code> explicitly.</p></aside>
+  <h2>Separate the transaction from the connection</h2>
+  <p>A sqlite3 connection can outlive several transactions. In the usual transactional mode, <code>with conn:</code> commits on normal exit or rolls back if an exception leaves the block. It does <em>not</em> close the database; close the connection separately, or wrap it in <code>contextlib.closing()</code>.</p>
+  <p>Put changes that must agree in the same transaction. For example, recording a purchase and updating stock should either both commit or both roll back. Catch an expected database exception <em>outside</em> the transaction block so the rollback sees it first. SQLAlchemy similarly separates the lifetime of a session from its transaction.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="34-1"><p class="task-text">Create a <code>notes</code> table with <code>id</code> and <code>text</code>, insert three notes, and print them all.</p>
@@ -3386,6 +3836,9 @@ urlpatterns = [path("items/&lt;int:item_id&gt;", get_item)]</code></pre></div>
     <figcaption>When nothing else decides it, FastAPI is the default for a new JSON API.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>In Express the request is a parameter: <code>(req, res) =&gt;</code>. In Flask it’s an import: <code>from flask import request</code>, then <code>request.args["q"]</code> inside the view. It looks like one global shared by every request, but Flask gives each request its own. FastAPI avoids the surprise: you declare what you need as parameters.</p></aside>
+  <h2>Pick for the part you don’t want to build</h2>
+  <p>If a TypeScript front end needs a typed JSON contract, start by testing one FastAPI endpoint and inspecting its OpenAPI schema. If staff also need to edit relational records, try registering a model in Django’s admin before building a separate admin UI. If you’re extending a small Flask service with conventions your team already knows, a migration may cost more than it saves.</p>
+  <p>When the choice isn’t obvious, prototype the hardest requirement first. A hello-world route won’t tell you how much of authentication, migrations or validation you’ll need to maintain yourself.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="35-1"><p class="task-text">Pick FastAPI, Django or Flask for three projects, and say why: a JSON API for a React app, an internal tool with logins and admin screens, and two new endpoints in an existing Flask service.</p>
@@ -3494,6 +3947,9 @@ app.include_router(router)</code></pre></div>
     <figcaption>Dependencies run before your function. A guard that raises stops the request, and tests can replace any dependency without touching the routes.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Write <code>Depends(get_notes)</code>, not <code>Depends(get_notes())</code>. You pass the function, and FastAPI calls it for every request. Calling it yourself runs it once at import time and hands FastAPI the result instead of a function, which fails with an error that doesn’t point at the real mistake.</p></aside>
+  <h2>Inject a value or enforce a rule</h2>
+  <p>Use a parameter such as <code>notes: Annotated[NotesRepository, Depends(get_notes)]</code> when the handler needs the returned object. To run a check without passing its return value into the handler, use <code>dependencies=[Depends(require_access)]</code> on the route or router. Both forms run the dependency before the handler and can stop the request by raising <code>HTTPException</code>.</p>
+  <p>In tests, override the dependency using the original function as the key. Remove that override afterward so it can’t affect later tests. Pair a <code>yield</code> dependency’s setup with <code>try</code>/<code>finally</code> when it owns a resource that must be closed.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="36-1"><p class="task-text">Write a <code>require_api_key</code> dependency that reads the <code>X-API-Key</code> header and answers 401 unless it matches, and use it to protect <code>GET /private</code>.</p>
@@ -3599,7 +4055,7 @@ async def log_requests(request, call_next):
   <p class="run">In development, <code>uv run fastapi dev main.py</code> reloads on every change. In a container, start it with <code>uvicorn main:app --host 0.0.0.0 --port 8000</code>.</p>
   <h2>What’s different</h2>
   <ul class="points">
-    <li><code>BaseSettings</code> is a Pydantic model filled from environment variables, with the same types and validation as lesson 13. A missing variable fails at startup, not on the first request. Wrap it in an <code>@lru_cache</code> function and inject it with <code>Depends</code> so tests can override it.</li>
+    <li><code>BaseSettings</code> is a Pydantic model filled from environment variables, with the same types and validation as lesson 13. It validates when instantiated. Wrap it in an <code>@lru_cache</code> function and inject that function with <code>Depends</code> so tests can override it.</li>
     <li>Logging is in the standard library. Each module gets <code>logging.getLogger(__name__)</code>, and the app configures it once at startup. Pass values as arguments (<code>logger.info("%s", path)</code>) rather than as an f-string. For JSON logs like pino, add structlog.</li>
     <li><code>@app.middleware("http")</code> wraps every request like Express middleware. Code before <code>await call_next(request)</code> runs before the route, and code after it sees the response.</li>
     <li>There’s no <code>app.listen()</code>. uvicorn imports your <code>app</code> object and serves it. <code>--workers 4</code> runs several processes like pm2 or <code>cluster</code>, but in containers you usually run one process each and scale the containers.</li>
@@ -3626,6 +4082,9 @@ async def log_requests(request, call_next):
     <figcaption>The front end’s types come from the same Pydantic models that validate requests, so the two sides can’t silently drift apart.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Inside a container, a server bound to <code>127.0.0.1</code> only accepts connections from inside that same container, so <code>docker run -p 8000:8000</code> seems to do nothing. Bind to <code>0.0.0.0</code>, as you would with <code>app.listen(port, "0.0.0.0")</code>. <code>fastapi run</code> does this by default. <code>uvicorn</code> doesn’t, so pass <code>--host 0.0.0.0</code>.</p></aside>
+  <h2>Validate configuration before serving traffic</h2>
+  <p><code>BaseSettings</code> validates when you instantiate it. Caching <code>get_settings()</code> avoids parsing on every request, but it doesn’t make that function run at startup. If it’s only used as a lazy dependency, the first request that needs it discovers any missing setting.</p>
+  <p>Call the settings factory during app startup (for example, in FastAPI’s lifespan setup) when invalid configuration should prevent the service from starting. Supply deployment values through the environment instead of baking them into the image, and report which setting needs attention without logging secret values.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="37-1"><p class="task-text">Write a <code>Settings</code> class that reads <code>NOTES_DATABASE_URL</code> (required), <code>NOTES_DEBUG</code>, <code>NOTES_PORT</code> and <code>NOTES_ALLOWED_ORIGINS</code> from the environment, with types and defaults.</p>
@@ -3737,6 +4196,9 @@ if __name__ == "__main__":
     <figcaption>Everything you’d parse, convert and check by hand in Node, Typer reads from the function signature.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>With a single <code>@app.command()</code>, Typer runs it directly: <code>greet.py Ada</code>. Add a second command and the first one suddenly needs its name: <code>greet.py greet Ada</code>. Scripts and docs that used the old form break. If a tool might grow, give it subcommands from the start.</p></aside>
+  <h2>Make output usable by scripts</h2>
+  <p>Write successful results to stdout so callers can pipe them into another program. Send diagnostics to stderr with <code>typer.echo(message, err=True)</code>. If a command can’t complete, <code>raise typer.Exit(code=1)</code> signals failure without mixing the error into the data stream.</p>
+  <p>Test both sides with <code>CliRunner</code>: assert on the result’s exit code and stdout for a valid invocation, and on the nonzero code and stderr for an invalid one. That checks the contract a shell script depends on, not just the words a human sees.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="38-1"><p class="task-text">Turn <code>greet(name, shout=False, times=1)</code> into a command that prints <code>Hello, Ada!</code>, in capitals with <code>--shout</code> and repeated with <code>--times</code>.</p>
@@ -3838,6 +4300,17 @@ print(totals)</code></pre></div>
     <figcaption>Each array method has a column-wise equivalent that works on the whole table at once.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>In TypeScript you’d write <code>o.qty &gt;= 3 &amp;&amp; o.region === "EU"</code>. In pandas, <code>(df["qty"] &gt;= 3) and (df["region"] == "EU")</code> raises <em>The truth value of a Series is ambiguous</em>, because <code>and</code> wants a single True or False, not a column of them. Use <code>&amp;</code>, <code>|</code> and <code>~</code>, and keep the parentheses, since <code>&amp;</code> binds tighter than <code>==</code>.</p></aside>
+  <h2>Group rows and name the result</h2>
+  <p>Think of <code>groupby()</code> as building buckets with a TypeScript <code>Map</code>, then running an aggregation on each bucket. Name the aggregated column so downstream code doesn’t have to guess what it means.</p>
+  <pre><code class="language-python">import pandas as pd
+
+orders = pd.DataFrame({"region": ["EU", "US", "EU"], "qty": [2, 1, 3]})
+summary = orders.groupby("region", as_index=False).agg(
+    units=("qty", "sum"),
+)
+print(summary.to_dict("records"))
+# [{'region': 'EU', 'units': 5}, {'region': 'US', 'units': 1}]</code></pre>
+  <p><code>as_index=False</code> keeps the group key as a column. By default, pandas drops rows whose group key is missing. Use <code>dropna=False</code> when totals must include an “unknown region” group.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="39-1"><p class="task-text">Return a copy of an orders DataFrame with a new <code>revenue</code> column (<code>price * qty</code>), without changing the original and without a loop.</p>
@@ -3931,6 +4404,9 @@ dev = [
     <figcaption>A phrasebook for your first real projects. Where a lesson covers the tool, it’s listed.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>The most common habit to unlearn is writing TypeScript in Python syntax: index loops, getters and setters, a class around a single function, <code>== None</code>. The code works, but it reads like a translation. Ruff catches some of it. Re-read lessons 5 to 8 and 25 to 28 after your first real project: they make more sense the second time.</p></aside>
+  <h2>Put the pieces together in one project</h2>
+  <p>Pick a task you already do manually. For example, build a <a href="#lesson-38">Typer command</a> that reads a CSV, validates each row, and writes a summary. Start with functions that take data and return data. Keep file I/O and command-line parsing at the edges, then <a href="#lesson-22">test</a> a valid row, a rejected row, and an empty file without running the whole CLI each time.</p>
+  <p>Once that works, add an API only if another program needs the same functionality. Keep the existing parsing and summarizing functions and let <a href="#lesson-33">FastAPI</a> handle HTTP. This gives you practice deciding what belongs in plain Python and what belongs in the framework.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="40-1"><p class="task-text">Build one small service end to end: a notes API with SQLAlchemy, settings from the environment, an API key, tests that swap the database, clean ruff and mypy runs, and a Dockerfile.</p>
@@ -3991,7 +4467,12 @@ dev = [
   var state = load();
 
   var lessons = Array.prototype.map.call(document.querySelectorAll("template.lesson"), function (t) {
-    return { n: t.dataset.n, section: +t.dataset.section, title: t.dataset.title, summary: t.dataset.summary, tpl: t };
+    var topics = Array.prototype.map.call(t.content.querySelectorAll("h2"), function (heading) {
+      return heading.textContent;
+    }).filter(function (topic) {
+      return topic !== "What’s different" && topic !== "See it" && topic !== "Practice";
+    }).join(" ");
+    return { n: t.dataset.n, section: +t.dataset.section, title: t.dataset.title, summary: t.dataset.summary, topics: topics, tpl: t };
   });
   var modules = Object.keys(SECTIONS).map(function (id) {
     return { id: id, name: SECTIONS[id].name, blurb: SECTIONS[id].blurb, lessons: lessons.filter(function (l) { return l.section === +id; }) };
@@ -4140,7 +4621,7 @@ dev = [
     modules.forEach(function (module, i) {
       var any = false;
       module.lessons.forEach(function (l) {
-        var description = (l.title + " " + l.summary + " " + module.name).toLowerCase();
+        var description = (l.title + " " + l.summary + " " + l.topics + " " + module.name).toLowerCase();
         var matches = terms.every(function (term) {
           return /^\d+$/.test(term) ? Number(term) === Number(l.n) : description.includes(term);
         });

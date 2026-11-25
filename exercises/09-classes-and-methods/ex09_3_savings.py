@@ -22,6 +22,9 @@ class SavingsAccount:
     means 5%.
 
     A SavingsAccount("Ada") with 100 deposited has 105.0 after add_interest(0.05).
+
+    Reuse Account's total property and deposit method. There's no extra state,
+    so you can inherit __init__ without redefining it.
     """
 
     # TODO: inherit from Account and add the add_interest(self, rate) method
