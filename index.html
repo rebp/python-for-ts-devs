@@ -3436,6 +3436,109 @@ for book in root.findall("book"):
   </ol>
 </template>
 
+<template class="lesson" data-n="xml" data-section="9" data-title="XML with lxml" data-summary="XPath, namespaces, mixed text, safe parsing and streaming large XML documents.">
+  <p class="lead">TypeScript often reads XML through a DOM package. Python’s <code>lxml</code> adds XPath and streaming to a tree API, but you must choose safe parser settings for untrusted documents.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">import { DOMParser } from "@xmldom/xmldom";
+
+const xml = `&lt;standard xmlns="urn:example:sts"&gt;
+  &lt;body&gt;&lt;sec&gt;&lt;title&gt;Scope&lt;/title&gt;&lt;/sec&gt;&lt;/body&gt;
+&lt;/standard&gt;`;
+const doc = new DOMParser().parseFromString(xml, "application/xml");
+const titles = Array.from(
+  doc.getElementsByTagNameNS("urn:example:sts", "title"),
+).map((title) =&gt; title.textContent);
+console.log(titles);  // ["Scope"]</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">from lxml import etree
+
+xml = b'''&lt;standard xmlns="urn:example:sts"&gt;
+  &lt;body&gt;&lt;sec&gt;&lt;title&gt;Scope&lt;/title&gt;&lt;/sec&gt;&lt;/body&gt;
+&lt;/standard&gt;'''
+parser = etree.XMLParser(
+    resolve_entities=False, load_dtd=False, no_network=True,
+)
+root = etree.fromstring(xml, parser)
+titles = root.xpath("//s:sec/s:title", namespaces={"s": "urn:example:sts"})
+print(["".join(title.itertext()) for title in titles])  # ['Scope']</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li><code>etree.fromstring</code> reads bytes; <code>etree.parse</code> reads a path or a binary file and returns a tree. Bytes let the XML declaration specify its encoding.</li>
+    <li>XPath prefixes are yours to choose. Bind <code>s</code> to the document’s namespace URI; unprefixed XPath names do not match elements in a default namespace. Our <code>urn:example:sts</code> is a teaching namespace, not an official STS namespace.</li>
+    <li>For mixed content, <code>element.text</code> is before its first child and a child’s <code>tail</code> is after that child. <code>itertext()</code> yields both in document order.</li>
+    <li>For untrusted input disable entity expansion, DTD loading and network access. Also limit input size; these settings are not schema validation and do not make every XML operation safe.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth">
+      <thead><tr><th>XML fragment</th><th>Where the text lives</th></tr></thead>
+      <tbody>
+        <tr><td><code>&lt;title&gt;Use </code></td><td><code>title.text == "Use "</code></td></tr>
+        <tr><td><code>&lt;italic&gt;safe&lt;/italic&gt;</code></td><td><code>italic.text == "safe"</code></td></tr>
+        <tr><td><code> parsing.&lt;/title&gt;</code></td><td><code>italic.tail == " parsing."</code></td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>Joining <code>title.itertext()</code> gives “Use safe parsing.” without losing the text after the inline element.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p>A JavaScript XML value is usually a string. Passing a Python Unicode string containing an XML encoding declaration to lxml raises an error. Read the original bytes instead; do not decode and then guess the encoding again.</p></aside>
+  <h2>Stream sections without retaining the tree</h2>
+  <p>Large standards documents may not fit comfortably in memory. An <code>end</code> event arrives when an element and its children are complete. Process it, clear it, and remove preceding siblings so the parent does not accumulate empty nodes. This example uses a small in-memory file; pass a real filename to process a large file.</p>
+  <pre><code class="language-python">from io import BytesIO
+from lxml import etree
+
+source = BytesIO(b'''&lt;standard xmlns="urn:example:sts"&gt;&lt;body&gt;
+  &lt;sec&gt;&lt;title&gt;Scope&lt;/title&gt;&lt;/sec&gt;
+  &lt;sec&gt;&lt;title&gt;Terms&lt;/title&gt;&lt;/sec&gt;
+&lt;/body&gt;&lt;/standard&gt;''')
+for _, section in etree.iterparse(
+    source, events=("end",), tag="{urn:example:sts}sec",
+    resolve_entities=False, load_dtd=False, no_network=True,
+):
+    print("".join(section.itertext()).strip())
+    parent = section.getparent()
+    section.clear()
+    if parent is not None:
+        while section.getprevious() is not None:
+            del parent[0]</code></pre>
+  <p>Use <code>uv add lxml</code> in your own project. Do not call XInclude on untrusted input without a separate policy, and treat XPath expressions supplied by users as untrusted code. Parsing can still raise <code>XMLSyntaxError</code>; handle it at the boundary rather than pretending the file was empty.</p>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="xml-1"><p class="task-text">Write <code>section_titles(xml: bytes)</code> to return all section titles from the STS-like namespace, including inline text. Do not resolve entities.</p>
+      <details><summary>Hint</summary><p>Bind a prefix in <code>namespaces</code>, then join each title’s <code>itertext()</code>.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from lxml import etree
+
+def section_titles(xml: bytes) -&gt; list[str]:
+    parser = etree.XMLParser(resolve_entities=False, no_network=True, load_dtd=False)
+    root = etree.fromstring(xml, parser)
+    titles = root.xpath("//s:sec/s:title", namespaces={"s": "urn:example:sts"})
+    return ["".join(title.itertext()) for title in titles]</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="xml-2"><p class="task-text">Count section elements in a file with <code>iterparse</code>, clearing processed elements and preceding siblings. Keep the same safe parser settings.</p>
+      <details><summary>Hint</summary><p>Match <code>{urn:example:sts}sec</code> on end events and keep a running count.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from pathlib import Path
+from lxml import etree
+
+def count_sections(path: Path) -&gt; int:
+    count = 0
+    for _, element in etree.iterparse(
+        str(path), events=("end",), tag="{urn:example:sts}sec",
+        resolve_entities=False, no_network=True, load_dtd=False,
+    ):
+        count += 1
+        parent = element.getparent()
+        element.clear()
+        if parent is not None:
+            while element.getprevious() is not None:
+                del parent[0]
+    return count</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="xml-3" data-manual><p class="task-text">For <code>&lt;title&gt;Use &lt;italic&gt;safe&lt;/italic&gt; parsing.&lt;/title&gt;</code>, predict the title’s text, the child’s text and tail, and the result of <code>itertext()</code>. Check in a REPL.</p>
+      <details><summary>Hint</summary><p>The child’s tail starts just after <code>&lt;/italic&gt;</code>.</p></details>
+      <details><summary>Solution</summary><p>The values are <code>"Use "</code>, <code>"safe"</code>, and <code>" parsing."</code>. Joining <code>itertext()</code> gives <code>"Use safe parsing."</code>.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
 <template class="lesson" data-n="32" data-section="9" data-title="Dates and times" data-summary="date, datetime and timedelta, aware vs naive values, time zones and ISO strings for JSON.">
   <p class="lead">Python’s <code>datetime</code> module is what JavaScript’s <code>Date</code> should have been: immutable values, separate types for dates and durations, and real time zones in the standard library. The one thing to learn is the difference between naive and aware datetimes.</p>
   <div class="compare">

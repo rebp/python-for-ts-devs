@@ -7,20 +7,21 @@ import shutil
 import subprocess
 import sys
 import textwrap
+from collections.abc import Callable
 from pathlib import Path
 
 
-def source_tree(obj: object) -> ast.AST:
+def source_tree(obj: Callable[..., object]) -> ast.AST:
     """Parse the source code of a function or class."""
     return ast.parse(textwrap.dedent(inspect.getsource(obj)))
 
 
-def uses_node(obj: object, node_type: type[ast.AST]) -> bool:
+def uses_node(obj: Callable[..., object], node_type: type[ast.AST]) -> bool:
     """True when the source of `obj` contains an AST node of `node_type` (a while loop, a list comprehension...)."""
     return any(isinstance(node, node_type) for node in ast.walk(source_tree(obj)))
 
 
-def calls_name(obj: object, name: str) -> bool:
+def calls_name(obj: Callable[..., object], name: str) -> bool:
     """True when the source of `obj` calls something named `name`, like any(...) or itertools.islice(...)."""
     for node in ast.walk(source_tree(obj)):
         if isinstance(node, ast.Call):
