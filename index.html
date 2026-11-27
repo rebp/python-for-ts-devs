@@ -1815,6 +1815,110 @@ class Stack[T]:
 </template>
 
 <!-- ================= SECTION 4 ================= -->
+<template class="lesson" data-n="datamodel" data-section="3" data-title="The data model: dunder methods" data-summary="Make your objects work with len, iteration, indexing, equality, hashing and operators.">
+  <p class="lead">TypeScript uses protocols such as <code>Symbol.iterator</code> and methods such as <code>toString</code>. Python connects built-in operations to special “dunder” methods, named for their double underscores.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">class Team {
+  constructor(private names: string[]) {}
+  get length() { return this.names.length; }
+  [Symbol.iterator]() { return this.names[Symbol.iterator](); }
+  toString() { return `Team(${this.names.join(", ")})`; }
+}
+
+const team = new Team(["Ada", "Lin"]);
+console.log(team.length, [...team], team.toString());</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">from collections.abc import Iterator
+
+class Team:
+    def __init__(self, names: list[str]) -&gt; None:
+        self.names = names
+
+    def __len__(self) -&gt; int:
+        return len(self.names)
+
+    def __iter__(self) -&gt; Iterator[str]:
+        return iter(self.names)
+
+    def __repr__(self) -&gt; str:
+        return f"Team({', '.join(self.names)})"
+
+team = Team(["Ada", "Lin"])
+print(len(team), list(team), repr(team))</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li><code>len(x)</code> calls <code>__len__</code>; <code>for</code> and <code>iter(x)</code> use <code>__iter__</code>. Indexing calls <code>__getitem__</code>, and <code>item in x</code> uses <code>__contains__</code>.</li>
+    <li><code>__repr__</code> is a useful developer-facing representation; <code>__str__</code> is for a human-facing string. They need not be identical.</li>
+    <li><code>a + b</code> calls <code>__add__</code>. Return <code>NotImplemented</code> for an unsupported operand so Python can try the reflected operation or raise <code>TypeError</code>.</li>
+    <li><code>__eq__</code> defines value equality. If equal objects are used in a set or as dict keys, their hashes must be equal and stay stable while stored.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth">
+      <thead><tr><th>Operation</th><th>Method Python looks for</th></tr></thead>
+      <tbody>
+        <tr><td><code>len(items)</code>, <code>for x in items</code></td><td><code>__len__</code>, <code>__iter__</code></td></tr>
+        <tr><td><code>items[0]</code>, <code>x in items</code></td><td><code>__getitem__</code>, <code>__contains__</code></td></tr>
+        <tr><td><code>a == b</code>, <code>{a}</code></td><td><code>__eq__</code>, <code>__hash__</code></td></tr>
+        <tr><td><code>repr(a)</code>, <code>a + b</code></td><td><code>__repr__</code>, <code>__add__</code></td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>Use the ordinary operation at the call site; Python invokes the matching special method.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p>Defining <code>__eq__</code> without defining <code>__hash__</code> makes the class unhashable: Python sets <code>__hash__ = None</code>. Set membership then raises <code>TypeError</code>, even if the object looks immutable.</p></aside>
+  <h2>Make equality and hashing agree</h2>
+  <p>Choose the same immutable data for both methods. This key compares names without case, so its hash must use that same normalized name. A frozen dataclass prevents changing the field after the object is added to a set.</p>
+  <pre><code class="language-python">from dataclasses import dataclass
+
+@dataclass(frozen=True, eq=False)
+class CaseKey:
+    name: str
+
+    def __eq__(self, other: object) -&gt; bool:
+        if not isinstance(other, CaseKey):
+            return NotImplemented
+        return self.name.casefold() == other.name.casefold()
+
+    def __hash__(self) -&gt; int:
+        return hash(self.name.casefold())
+
+print(CaseKey("ADA") in {CaseKey("Ada")})  # True</code></pre>
+  <p>Do not hash mutable fields whose value can change. If equality is not a useful stable value comparison, leaving the object unhashable is safer than inventing a hash that violates the contract.</p>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="datamodel-1"><p class="task-text">Make a <code>Playlist</code> support length, iteration, integer indexing, membership, addition and a useful <code>repr</code>. Addition must leave its inputs unchanged.</p>
+      <details><summary>Hint</summary><p>Store song names as a tuple and delegate the sequence operations to it.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from collections.abc import Iterator
+
+class Playlist:
+    def __init__(self, songs: list[str]) -&gt; None:
+        self._songs = tuple(songs)
+    def __len__(self) -&gt; int:
+        return len(self._songs)
+    def __iter__(self) -&gt; Iterator[str]:
+        return iter(self._songs)
+    def __getitem__(self, index: int) -&gt; str:
+        return self._songs[index]
+    def __contains__(self, song: object) -&gt; bool:
+        return song in self._songs
+    def __add__(self, other: "Playlist") -&gt; "Playlist":
+        if not isinstance(other, Playlist):
+            return NotImplemented
+        return Playlist(list(self._songs + other._songs))
+    def __repr__(self) -&gt; str:
+        return f"Playlist({list(self._songs)!r})"</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="datamodel-2"><p class="task-text">Implement case-insensitive equality and hashing for the frozen <code>CaseKey</code>.</p>
+      <details><summary>Hint</summary><p>Use <code>casefold()</code> in both methods and <code>NotImplemented</code> for other types.</p></details>
+      <details><summary>Solution</summary><p>Use the <code>CaseKey</code> implementation above: compare and hash <code>name.casefold()</code>.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="datamodel-3" data-manual><p class="task-text">Predict what happens when an object defines <code>__eq__</code> but no <code>__hash__</code> and is added to a set. How could an immutable value safely support hashing?</p>
+      <details><summary>Hint</summary><p>Equal values need equal, stable hashes.</p></details>
+      <details><summary>Solution</summary><p>Python makes it unhashable and the set raises <code>TypeError</code>. Implement compatible methods using immutable fields, or use a suitable frozen dataclass.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
 <template class="lesson" data-n="generics" data-section="3" data-title="Generics the modern way" data-summary="Generic functions, classes and aliases, bounds, ParamSpec and TypeIs.">
   <p class="lead">Python’s modern generics look familiar if you know TypeScript, but their type parameters use square brackets. Like TypeScript types, they guide a checker rather than validate values at runtime.</p>
   <div class="compare">
