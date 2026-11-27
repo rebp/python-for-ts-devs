@@ -1815,6 +1815,115 @@ class Stack[T]:
 </template>
 
 <!-- ================= SECTION 4 ================= -->
+<template class="lesson" data-n="generics" data-section="3" data-title="Generics the modern way" data-summary="Generic functions, classes and aliases, bounds, ParamSpec and TypeIs.">
+  <p class="lead">Python’s modern generics look familiar if you know TypeScript, but their type parameters use square brackets. Like TypeScript types, they guide a checker rather than validate values at runtime.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">type Batch&lt;T&gt; = T[];
+
+class Box&lt;T&gt; {
+  constructor(public value: T) {}
+}
+
+function first&lt;T&gt;(items: Batch&lt;T&gt;): T | undefined {
+  return items[0];
+}
+
+const box = new Box(3);
+console.log(first([box.value, 4]));  // 3</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">type Batch[T] = list[T]
+
+class Box[T]:
+    def __init__(self, value: T) -&gt; None:
+        self.value = value
+
+def first[T](items: Batch[T]) -&gt; T | None:
+    return items[0] if items else None
+
+box = Box(3)
+print(first([box.value, 4]))  # 3</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li><code>def first[T]</code>, <code>class Box[T]</code> and <code>type Batch[T]</code> declare their parameters where they are used. You may still see older <code>TypeVar</code> and <code>Generic</code> declarations.</li>
+    <li>A bound such as <code>T: Sized</code> says the checker may assume <code>len(value)</code> works, much like <code>T extends</code> in TypeScript. It does not check the bound at runtime.</li>
+    <li>A <code>type</code> alias describes another type; it is not a class to pass to <code>isinstance</code>. Use the concrete runtime type for a runtime check.</li>
+    <li><code>**P</code> declares a <code>ParamSpec</code>: <code>P.args</code> and <code>P.kwargs</code> carry a callable’s parameters through a decorator.</li>
+    <li><code>TypeIs</code> from <code>typing</code> lets a predicate narrow both branches. Its target must be compatible with its input, and the predicate must tell the truth.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth">
+      <thead><tr><th>Need</th><th>TypeScript</th><th>Python</th></tr></thead>
+      <tbody>
+        <tr><td>Keep a value’s type</td><td><code>f&lt;T&gt;(x: T): T</code></td><td><code>def f[T](x: T) -&gt; T</code></td></tr>
+        <tr><td>Require a capability</td><td><code>T extends HasLength</code></td><td><code>T: Sized</code></td></tr>
+        <tr><td>Preserve parameters</td><td><code>Parameters&lt;F&gt;</code></td><td><code>Callable[P, R]</code></td></tr>
+        <tr><td>Custom narrowing</td><td><code>x is string</code></td><td><code>TypeIs[str]</code></td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>A type checker follows these relationships; the runtime executes the function bodies.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p><code>Box[int]("wrong")</code> still constructs a box at runtime even though a checker rejects it. A generic annotation is not a validator; use an actual check or Pydantic at an untrusted boundary.</p></aside>
+  <h2>Preserve a callable’s signature</h2>
+  <p>A decorator that accepts <code>Callable[..., R]</code> loses the relationship between the original arguments and the wrapper. A parameter specification carries positional and keyword parameters together, while <code>wraps</code> keeps useful runtime metadata.</p>
+  <pre><code class="language-python">from collections.abc import Callable
+from functools import wraps
+
+def traced[**P, R](function: Callable[P, R]) -&gt; Callable[P, R]:
+    @wraps(function)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -&gt; R:
+        print("calling", function.__name__)
+        return function(*args, **kwargs)
+    return wrapper
+
+@traced
+def label(name: str, *, times: int) -&gt; str:
+    return name * times
+
+print(label("Ada", times=2))</code></pre>
+  <p>The checker still rejects <code>label(3)</code> or a missing <code>times</code>. For a runtime predicate, write the check itself and annotate its result; here the false branch is also narrowed:</p>
+  <pre><code class="language-python">from typing import TypeIs, assert_type
+
+def is_text(value: str | int) -&gt; TypeIs[str]:
+    return isinstance(value, str)
+
+def show(value: str | int) -&gt; None:
+    if is_text(value):
+        assert_type(value, str)
+        print(value.upper())
+    else:
+        assert_type(value, int)
+        print(value + 1)
+
+show("ada")
+show(2)</code></pre>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="generics-1"><p class="task-text">Write <code>longest</code> for a sequence of sized values. Return the first longest value with its original type; reject an empty sequence.</p>
+      <details><summary>Hint</summary><p>Use <code>T: Sized</code> and <code>max(items, key=len)</code>.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from collections.abc import Sequence, Sized
+
+def longest[T: Sized](items: Sequence[T]) -&gt; T:
+    return max(items, key=len)</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="generics-2"><p class="task-text">Write a typed <code>twice</code> decorator that calls its function twice and returns both results, without losing its parameters or metadata.</p>
+      <details><summary>Hint</summary><p>Use <code>**P</code>, <code>P.args</code>, <code>P.kwargs</code> and <code>@wraps</code>.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from collections.abc import Callable
+from functools import wraps
+
+def twice[**P, R](function: Callable[P, R]) -&gt; Callable[P, tuple[R, R]]:
+    @wraps(function)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -&gt; tuple[R, R]:
+        return function(*args, **kwargs), function(*args, **kwargs)
+    return wrapper</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="generics-3" data-manual><p class="task-text">Write an <code>is_text</code> predicate for <code>str | int</code>. What does a checker infer in each branch, and what performs the runtime check?</p>
+      <details><summary>Hint</summary><p>Return <code>isinstance(value, str)</code> and annotate the result as <code>TypeIs[str]</code>.</p></details>
+      <details><summary>Solution</summary><p>The true branch is <code>str</code>, the false branch is <code>int</code>, and <code>isinstance</code> performs the check. The annotation tells the type checker how to narrow.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
 <template class="lesson" data-n="15" data-section="4" data-title="Lists and tuples" data-summary="Negative indexes, slicing, unpacking and in-place vs new-list methods.">
   <p class="lead">Lists are your arrays, with two superpowers: negative indexes and slicing. Tuples are fixed-size, read-only sequences, perfect for returning several values.</p>
   <div class="compare">
