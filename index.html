@@ -5062,6 +5062,96 @@ def select_versions(versions: Iterable[str], minimum: str) -&gt; list[str]:
   </ol>
 </template>
 
+<template class="lesson" data-n="packaging" data-section="11" data-title="Packaging and publishing" data-summary="Build a wheel and source distribution, define a command, and rehearse a TestPyPI release.">
+  <p class="lead">Publishing a Python package is like publishing to npm: describe the project, build an artifact, and upload it. Python distinguishes the distribution name from the module you import.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">function greet(name: string): string {
+  return `Hello, ${name}!`;
+}
+console.log(greet("Ada"));  // Hello, Ada!</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">def greet(name: str) -&gt; str:
+    return f"Hello, {name}!"
+
+print(greet("Ada"))  # Hello, Ada!</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li><code>pyproject.toml</code> holds the project name, version, Python requirement and dependencies. A <code>[build-system]</code> selects the backend that creates distributions.</li>
+    <li><code>uv build</code> writes a source distribution and a wheel to <code>dist/</code>. A wheel is an installable artifact; its contents depend on the build backend.</li>
+    <li><code>[project.scripts]</code> maps a command name to <code>module:function</code>, much like the <code>bin</code> field in npm. The installer creates a small command that calls that function.</li>
+    <li><code>uv publish</code> uploads artifacts. TestPyPI is a separate index for rehearsals; use its upload URL, not the production PyPI URL.</li>
+    <li>Keep tokens out of code and Git. Prefer trusted publishing where available, or supply <code>UV_PUBLISH_TOKEN</code> through a secure environment.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth">
+      <thead><tr><th>Step</th><th>Python</th><th>npm analogy</th></tr></thead>
+      <tbody>
+        <tr><td>Metadata</td><td><code>pyproject.toml</code></td><td><code>package.json</code></td></tr>
+        <tr><td>Command</td><td><code>project.scripts</code></td><td><code>bin</code></td></tr>
+        <tr><td>Build</td><td><code>uv build</code></td><td>Build / pack</td></tr>
+        <tr><td>Upload</td><td><code>uv publish</code></td><td><code>npm publish</code></td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>Build and inspect the artifacts before uploading; publishing is not part of the automated exercises.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p>The name installed from an index can differ from the import name. A distribution named <code>hello-tool</code> can contain <code>hello_tool</code>; the entry point uses the Python import path, not the distribution name.</p></aside>
+  <h2>Build before publishing</h2>
+  <p>For a package under <code>src/hello_tool/</code>, define metadata and a console command. The exact backend version belongs in your project’s own lock and build policy; this example uses uv’s build backend.</p>
+  <pre><code class="language-toml">[project]
+name = "hello-tool"
+version = "0.1.0"
+description = "A small greeting command"
+requires-python = "&gt;=3.15"
+
+[project.scripts]
+hello = "hello_tool.cli:main"
+
+[build-system]
+requires = ["uv_build&gt;=0.13.5,&lt;0.14"]
+build-backend = "uv_build"</code></pre>
+  <p>In <code>src/hello_tool/cli.py</code>, define a no-argument entry point. The optional argument below makes it easy to test without changing the process’s real arguments.</p>
+  <pre><code class="language-python">import argparse
+
+def main(argv: list[str] | None = None) -&gt; int:
+    parser = argparse.ArgumentParser(prog="hello")
+    parser.add_argument("name")
+    args = parser.parse_args(argv)
+    print(f"Hello, {args.name}!")
+    return 0</code></pre>
+  <p>Run <code>uv build</code>, inspect both files in <code>dist/</code>, and test an installation in a clean environment. To rehearse an upload, configure TestPyPI authentication securely and run <code>uv publish --publish-url https://test.pypi.org/legacy/</code>. Use a unique package name and version; do not put a real token in the file or a test.</p>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="packaging-1"><p class="task-text">Read a project’s TOML name, version and optional console scripts, rejecting invalid fields.</p>
+      <details><summary>Hint</summary><p><code>tomllib.loads</code> returns nested dictionaries; check types before using them.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">import tomllib
+
+def read_metadata(text: str) -&gt; tuple[str, str, dict[str, str]]:
+    data = tomllib.loads(text)
+    project = data.get("project")
+    if not isinstance(project, dict):
+        raise ValueError("project table is required")
+    name, version = project.get("name"), project.get("version")
+    scripts = project.get("scripts", {})
+    if not isinstance(name, str) or not name or not isinstance(version, str) or not version:
+        raise ValueError("name and version must be nonempty strings")
+    if not isinstance(scripts, dict) or not all(
+        isinstance(k, str) and isinstance(v, str) for k, v in scripts.items()
+    ):
+        raise ValueError("scripts must map strings to strings")
+    return name, version, scripts</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="packaging-2"><p class="task-text">Write a testable console entry point that accepts a name, prints a greeting and returns zero; a missing name should report a usage error.</p>
+      <details><summary>Hint</summary><p><code>argparse.ArgumentParser.parse_args(argv)</code> handles the missing argument.</p></details>
+      <details><summary>Solution</summary><p>Use the <code>main</code> function above, changing the command name to <code>greet</code>.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="packaging-3" data-manual><p class="task-text">Plan the metadata, build and TestPyPI upload for a scratch package. Do not actually publish it.</p>
+      <details><summary>Hint</summary><p>TestPyPI has a separate upload endpoint and credentials.</p></details>
+      <details><summary>Solution</summary><p>Declare metadata, a build backend and <code>project.scripts</code>, run <code>uv build</code>, inspect the artifacts, then use <code>uv publish --publish-url https://test.pypi.org/legacy/</code> with credentials supplied securely.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
 <template class="lesson" data-n="38" data-section="11" data-title="Command-line tools with Typer" data-summary="Type hints become arguments, options and --help, with none of the parsing code.">
   <p class="lead">Python is a great language for the small tools every team needs: scripts, migrations, admin commands. Typer reads a function’s signature and builds the command line from it, so the type hints you already write become arguments, options and help text.</p>
   <div class="compare">
