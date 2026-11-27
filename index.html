@@ -4773,6 +4773,114 @@ dev = [
   </ol>
 </template>
 
+<template class="lesson" data-n="architecture" data-section="13" data-title="Structuring a large codebase" data-summary="src layout, uv workspaces, import cycles and enforceable dependency layers.">
+  <p class="lead">A Python project can start as a few files, like a TypeScript project. As it grows, package boundaries and import direction matter more than the number of folders.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">function checkout(prices: number[], save: (n: number) =&gt; void) {
+  const total = prices.reduce((a, b) =&gt; a + b, 0);
+  save(total);
+  return total;
+}
+
+const saved: number[] = [];
+console.log(checkout([10, 20], n =&gt; { saved.push(n); }), saved);
+// 30 [30]</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">from collections.abc import Callable
+
+def checkout(prices: list[int], save: Callable[[int], None]) -&gt; int:
+    total = sum(prices)
+    save(total)
+    return total
+
+saved: list[int] = []
+print(checkout([10, 20], saved.append), saved)  # 30 [30]</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li>A <code>src/</code> layout puts importable code under <code>src/shop/</code>, separate from tests and configuration. Install the project in its environment so imports use the package rather than a convenient working directory.</li>
+    <li>A uv workspace is like a pnpm workspace: each member has a <code>pyproject.toml</code>, while the workspace shares a lockfile. Declare a member as a dependency and set its source to <code>{ workspace = true }</code>.</li>
+    <li>Python executes module bodies on import. Two modules importing each other can see a partially initialized module. Move a shared type to a lower-level module instead of hiding the cycle with scattered imports.</li>
+    <li>Keep business rules independent of HTTP and storage. Pass a callable or protocol into the core; the outer layer supplies the database implementation.</li>
+    <li><code>import-linter</code> checks dependency contracts, including indirect imports. A layers contract lists the highest layer first and the domain last.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth">
+      <thead><tr><th>Layer</th><th>May depend on</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>API</td><td>Application, domain</td><td>HTTP routes</td></tr>
+        <tr><td>Application</td><td>Domain</td><td>Use cases</td></tr>
+        <tr><td>Domain</td><td>Neither outer layer</td><td>Rules and shared types</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>Dependencies point inward. An adapter can implement a domain protocol without making the domain import the adapter.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p>An import is executable work in Python. If <code>pricing</code> imports <code>inventory</code> while <code>inventory</code> imports a name from <code>pricing</code>, that name may not exist yet. Put the shared model in a third module both can import.</p></aside>
+  <h2>Keep imports pointing toward the domain</h2>
+  <p>The core below depends only on a protocol. The in-memory adapter stands in for a database, so the same rule can be tested without opening a connection. This is the same dependency-inversion idea used with interfaces in TypeScript.</p>
+  <pre><code class="language-python">from typing import Protocol
+
+class Store(Protocol):
+    def save(self, total: int) -&gt; None: ...
+
+def checkout(prices: list[int], store: Store) -&gt; int:
+    total = sum(prices)
+    store.save(total)
+    return total
+
+class MemoryStore:
+    def __init__(self) -&gt; None:
+        self.saved: list[int] = []
+
+    def save(self, total: int) -&gt; None:
+        self.saved.append(total)
+
+store = MemoryStore()
+print(checkout([10, 20], store), store.saved)  # 30 [30]</code></pre>
+  <p>For a workspace, the root project might depend on a member in <code>packages/shop-domain</code>. Each member needs its own project metadata and importable package. Workspace members use one lockfile and compatible Python requirements; they are not isolated environments.</p>
+  <pre><code class="language-toml">[project]
+name = "shop-api"
+version = "0.1.0"
+requires-python = "&gt;=3.15"
+dependencies = ["shop-domain"]
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+shop-domain = { workspace = true }</code></pre>
+  <p>For a single importable <code>shop</code> package, add an import-linter contract like the one in practice, install the tool in your project, and run <code>uv run lint-imports</code>. Check the contract in CI so a future import cannot quietly reverse the dependency direction.</p>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="architecture-1"><p class="task-text">Break the cycle between <code>pricing</code> and <code>inventory</code> by moving their shared <code>Product</code> to <code>models</code>. Both modules must import in either order.</p>
+      <details><summary>Hint</summary><p>Let <code>pricing</code> import the model, and let <code>inventory</code> import the model and <code>total</code>.</p></details>
+      <details><summary>Solution</summary><p>Move the frozen <code>Product(name, price)</code> dataclass into <code>models.py</code>. Import it from <code>.models</code> in both modules; only <code>inventory</code> imports <code>total</code> from <code>.pricing</code>. The full files are in the reference solution.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="architecture-2"><p class="task-text">Write <code>checkout</code> with an injected save function. Reject an empty list or negative prices before saving; propagate storage errors.</p>
+      <details><summary>Hint</summary><p>Validate first, then calculate, call the supplied function once, and return the total.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from collections.abc import Callable
+
+def checkout(prices: list[int], save_total: Callable[[int], None]) -&gt; int:
+    if not prices or any(price &lt; 0 for price in prices):
+        raise ValueError("prices must be nonempty and nonnegative")
+    total = sum(prices)
+    save_total(total)
+    return total</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="architecture-3" data-manual><p class="task-text">Write an import-linter layers contract for <code>shop.api</code>, <code>shop.application</code> and <code>shop.domain</code>, and explain how a workspace member is declared.</p>
+      <details><summary>Hint</summary><p>List layers from highest to lowest; a workspace source does not replace the dependency declaration.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-toml">[tool.importlinter]
+root_package = "shop"
+
+[[tool.importlinter.contracts]]
+name = "Dependencies point toward the domain"
+type = "layers"
+layers = ["shop.api", "shop.application", "shop.domain"]</code></pre>
+      <p>Declare the member in <code>dependencies</code> and map it with <code>workspace = true</code> under <code>tool.uv.sources</code>.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
