@@ -3,7 +3,7 @@
 ## Dockerfile
 
 ```dockerfile
-FROM python:3.12-slim
+FROM python:3.15-slim
 
 # Copy the uv binary from its official image instead of installing it with pip.
 COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /bin/

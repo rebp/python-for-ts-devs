@@ -12,8 +12,8 @@ from __future__ import annotations
 
 import sys
 
-if sys.version_info < (3, 12):  # noqa: UP036  (a friendly message for the system Python)
-    sys.exit("This course needs Python 3.12 or newer. Run it with: uv run course.py")
+if sys.version_info < (3, 15):  # noqa: UP036  (a friendly message for the system Python)
+    sys.exit("This course needs Python 3.15 or newer. Run it with: uv run course.py")
 
 import argparse
 import ast

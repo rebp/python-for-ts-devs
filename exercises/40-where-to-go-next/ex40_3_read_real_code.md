@@ -4,7 +4,7 @@ The fastest way to learn idiomatic Python is to read code by people who write
 it every day, and you already have plenty on your machine.
 
 1. Open the installed libraries in this project:
-   `.venv/lib/python3.12/site-packages/` on macOS and Linux, or
+   `.venv/lib/python3.15/site-packages/` on macOS and Linux, or
    `.venv\Lib\site-packages\` on Windows. Every library the course used is
    there as plain Python source.
 2. Pick one: `typer/main.py`, `fastapi/routing.py`,

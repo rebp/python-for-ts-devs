@@ -3230,7 +3230,7 @@ asyncio.run(main())</code></pre></details>
 </template>
 
 <template class="lesson" data-n="30" data-section="7" data-title="Threads, processes and the GIL" data-summary="Real threads, a lock you didn’t need in Node, and processes for CPU-heavy work.">
-  <p class="lead">Node runs your JavaScript on one thread, and the only way to do two things at once is async I/O or a worker. Python has async too (lesson 29), but it also has real operating-system threads. Because of the GIL, they speed up waiting, not computing. For heavy computation you use processes.</p>
+  <p class="lead">Node runs your JavaScript on one thread, and the only way to do two things at once is async I/O or a worker. Python has async too (lesson 29), but it also has real operating-system threads. In the default build, the GIL means threads speed up waiting, not Python computation. For heavy computation you can use processes.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript (Node)</div><pre><code class="language-typescript">// One thread runs your JS.
 // I/O is async; CPU work needs a worker.
@@ -3377,7 +3377,7 @@ print(root.find("title").text, root.get("year"))  # Dune 1965</code></pre>
     <li><code>json.loads</code> and <code>json.dumps</code> work on strings; <code>json.load</code> and <code>json.dump</code> work on open files.</li>
     <li><code>csv.DictReader</code> gives each row as a dict keyed by the header row. All values arrive as strings.</li>
     <li><code>ElementTree</code> handles everyday XML. The third-party <code>lxml</code> adds full XPath and schema validation for heavier XML work.</li>
-    <li>Always pass <code>encoding="utf-8"</code>; the default depends on the operating system.</li>
+    <li>Python 3.15 defaults to UTF-8. Passing <code>encoding="utf-8"</code> explicitly also makes your intent clear on older versions and in other configurations.</li>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
@@ -4059,7 +4059,7 @@ async def log_requests(request, call_next):
     <li>Logging is in the standard library. Each module gets <code>logging.getLogger(__name__)</code>, and the app configures it once at startup. Pass values as arguments (<code>logger.info("%s", path)</code>) rather than as an f-string. For JSON logs like pino, add structlog.</li>
     <li><code>@app.middleware("http")</code> wraps every request like Express middleware. Code before <code>await call_next(request)</code> runs before the route, and code after it sees the response.</li>
     <li>There’s no <code>app.listen()</code>. uvicorn imports your <code>app</code> object and serves it. <code>--workers 4</code> runs several processes like pm2 or <code>cluster</code>, but in containers you usually run one process each and scale the containers.</li>
-    <li>The Docker image is <code>python:3.12-slim</code> plus <code>uv sync --frozen</code>, the <code>npm ci</code> of uv. Copy <code>pyproject.toml</code> and <code>uv.lock</code> before your code so Docker caches the install.</li>
+    <li>The Docker image is <code>python:3.15-slim</code> plus <code>uv sync --frozen</code>, the <code>npm ci</code> of uv. Copy <code>pyproject.toml</code> and <code>uv.lock</code> before your code so Docker caches the install.</li>
     <li>FastAPI’s <code>/openapi.json</code> is a contract your front end can compile against. <code>openapi-typescript</code> generates TypeScript types from it, so a renamed field becomes a <code>tsc</code> error instead of a bug in production.</li>
   </ul>
   <h2>See it</h2>
@@ -4114,7 +4114,7 @@ def health() -&gt; dict[str, str]:
       <label class="done"><input type="checkbox"> Done</label></li>
     <li class="task" data-task="37-3"><p class="task-text">Put the notes service in a Docker image, run it, and generate a typed TypeScript client from its <code>/openapi.json</code>.</p>
       <details><summary>Solution</summary><pre><code class="language-bash"># Dockerfile
-FROM python:3.12-slim
+FROM python:3.15-slim
 COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /bin/
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
@@ -4415,7 +4415,7 @@ dev = [
     <li class="task" data-task="40-2"><p class="task-text">Port something small that your team already has in TypeScript, such as a script or one endpoint. Note which packages you replaced and every place you caught yourself writing TypeScript in Python.</p>
       <details><summary>Solution</summary><p>There’s no single answer. Data shaping, file handling and scripts usually get shorter. Code that leans on advanced TypeScript types usually gets simpler types. Check your port for index loops, <code>== None</code>, mutable defaults and one-method classes, then run ruff and mypy on it.</p></details>
       <label class="done"><input type="checkbox"> Done</label></li>
-    <li class="task" data-task="40-3"><p class="task-text">Open the installed libraries (<code>.venv/lib/python3.12/site-packages/</code> on macOS and Linux, <code>.venv\Lib\site-packages\</code> on Windows), pick a library the course used, and find three things from the course in its source.</p>
+    <li class="task" data-task="40-3"><p class="task-text">Open the installed libraries (<code>.venv/lib/python3.15/site-packages/</code> on macOS and Linux, <code>.venv\Lib\site-packages\</code> on Windows), pick a library the course used, and find three things from the course in its source.</p>
       <details><summary>Solution</summary><p>For example, <code>fastapi/routing.py</code> shows that <code>router.get(...)</code> returns a decorator (lesson 27), <code>typer/main.py</code> builds commands by inspecting function signatures, and SQLAlchemy’s <code>Session</code> defines <code>__enter__</code> and <code>__exit__</code> (lesson 28), which is why <code>with Session(engine) as session:</code> works.</p></details>
       <label class="done"><input type="checkbox"> Done</label></li>
   </ol>

@@ -3,7 +3,7 @@ name = "python-for-ts-devs-exercises"
 version = "0.1.0"
 description = "Self-checking exercises for the course Python for TypeScript developers"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.15"
 # Libraries that the lessons use: Pydantic (13), FastAPI + httpx (28, 30-32), SQLAlchemy (29),
 # pydantic-settings (32), Typer (33), pandas (34).
 dependencies = [

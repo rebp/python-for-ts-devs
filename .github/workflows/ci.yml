@@ -9,11 +9,12 @@ on:
 
 jobs:
   check:
-    name: ${{ matrix.os }}
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.15"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +23,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
 
       - name: Install Python and dependencies (exactly as in uv.lock)
-        run: uv sync --locked
+        run: uv sync --locked --python ${{ matrix.python }}
 
       - name: Every exercise fails on its stub and passes on its solution
         run: uv run course.py --verify

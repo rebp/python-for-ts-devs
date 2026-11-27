@@ -20,7 +20,7 @@ PowerShell or the VS Code terminal.
 - **Git**, to get the course.
 - **[uv](https://docs.astral.sh/uv/)**, the Python project tool (think `npm`
   and `nvm` in one). You don't need to install Python yourself: uv downloads
-  Python 3.12 the first time you run the course.
+  Python 3.15 the first time you run the course.
 - **A browser** for the lessons, and **an editor** for the exercises. VS Code
   works well (see [Tips](#tips)).
 - Only for exercise 37-3: Docker and Node.js.
