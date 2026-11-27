@@ -1,7 +1,7 @@
 """Exercise runner for "Python for TypeScript developers".
 
 uv run course.py              show the next exercise and check it
-uv run course.py 03-2         check one exercise by its id
+uv run course.py 1.3-2        check one exercise by its topic and lesson
 uv run course.py --done       mark the current README exercise as done
 uv run course.py --list       list every exercise and its status
 uv run course.py --progress   show your progress per section
@@ -31,57 +31,79 @@ SOLUTIONS = ROOT / "solutions"
 PROGRESS_FILE = ROOT / "progress.json"
 
 SECTIONS = {
-    1: ("Python for TypeScript developers", range(1, 5)),
-    2: ("How Python handles data", range(5, 9)),
-    3: ("Your own types", range(9, 15)),
-    4: ("Collections and errors", range(15, 19)),
-    5: ("Modules, packages and tooling", range(19, 25)),
-    6: ("Pythonic Python", range(25, 29)),
-    7: ("Beyond the basics", range(29, 35)),
-    8: ("Python in the real world", range(35, 41)),
+    1: ("Python fundamentals", ("01", "02", "03", "04")),
+    2: ("How Python handles data", ("05", "06", "07", "08")),
+    3: (
+        "Classes and types",
+        ("09", "10", "11", "12", "13", "14", "datamodel", "generics"),
+    ),
+    4: ("Collections and errors", ("15", "16", "17", "smallfeatures", "18")),
+    5: ("Modules and tooling", ("19", "20", "21")),
+    6: ("Testing and debugging", ("22", "23", "coverage", "24", "profiling")),
+    7: ("Pythonic Python", ("25", "26", "27", "28")),
+    8: ("Concurrency", ("29", "asyncprod", "30")),
+    9: ("Files and data formats", ("31", "xml", "32")),
+    10: ("Web APIs and databases", ("33", "34", "postgres", "35", "36")),
+    11: ("Shipping and packaging", ("37", "ci", "packaging", "38")),
+    12: ("Data and AI", ("39", "arrays", "llm")),
+    13: ("Going further", ("40", "architecture", "modern")),
 }
 
 LESSONS = {
-    1: "Hello, Python",
-    2: "Variables and types",
-    3: "Functions",
-    4: "Control flow",
-    5: "Names and objects",
-    6: "Mutable and immutable",
-    7: "Truthiness, None and equality",
-    8: "Scope and the mutable default trap",
-    9: "Classes and methods",
-    10: "Dataclasses",
-    11: "Enums and match",
-    12: "Optional values",
-    13: "Protocols and Pydantic",
-    14: "Typing in depth",
-    15: "Lists and tuples",
-    16: "Strings in depth",
-    17: "Dicts and sets",
-    18: "Exceptions",
-    19: "Modules and imports",
-    20: "Dependencies and environments",
-    21: "Linting, formatting and type checking",
-    22: "Testing with pytest",
-    23: "Mocking and test doubles",
-    24: "Debugging",
-    25: "Comprehensions and lambdas",
-    26: "Iterators and generators",
-    27: "Decorators",
-    28: "Context managers",
-    29: "Async and await",
-    30: "Threads, processes and the GIL",
-    31: "Files and data formats",
-    32: "Dates and times",
-    33: "Web APIs with FastAPI",
-    34: "Databases",
-    35: "Choosing a web framework",
-    36: "A real FastAPI service",
-    37: "Shipping a web service",
-    38: "Command-line tools with Typer",
-    39: "Data work with pandas",
-    40: "Where to go next",
+    "01": "Hello, Python",
+    "02": "Variables and types",
+    "03": "Functions",
+    "04": "Control flow",
+    "05": "Names and objects",
+    "06": "Mutable and immutable",
+    "07": "Truthiness, None and equality",
+    "08": "Scope and the mutable default trap",
+    "09": "Classes and methods",
+    "10": "Dataclasses",
+    "11": "Enums and match",
+    "12": "Optional values",
+    "13": "Protocols and Pydantic",
+    "14": "Typing in depth",
+    "datamodel": "The data model: dunder methods",
+    "generics": "Generics the modern way",
+    "15": "Lists and tuples",
+    "16": "Strings in depth",
+    "17": "Dicts and sets",
+    "smallfeatures": "Small features TS devs trip on",
+    "18": "Exceptions",
+    "19": "Modules and imports",
+    "20": "Dependencies and environments",
+    "21": "Linting, formatting and type checking",
+    "22": "Testing with pytest",
+    "23": "Mocking and test doubles",
+    "coverage": "Coverage and property-based tests",
+    "24": "Debugging",
+    "profiling": "Profiling and performance",
+    "25": "Comprehensions and lambdas",
+    "26": "Iterators and generators",
+    "27": "Decorators",
+    "28": "Context managers",
+    "29": "Async and await",
+    "asyncprod": "Async in production",
+    "30": "Threads, processes and the GIL",
+    "31": "Files and data formats",
+    "xml": "XML with lxml",
+    "32": "Dates and times",
+    "33": "Web APIs with FastAPI",
+    "34": "Databases",
+    "postgres": "Postgres for real",
+    "35": "Choosing a web framework",
+    "36": "A real FastAPI service",
+    "37": "Shipping a web service",
+    "ci": "CI and pre-commit",
+    "packaging": "Packaging and publishing",
+    "38": "Command-line tools with Typer",
+    "39": "Data work with pandas",
+    "arrays": "NumPy and Polars",
+    "llm": "Calling LLM APIs",
+    "40": "Where to go next",
+    "architecture": "Structuring a large codebase",
+    "modern": "What's new in Python 3.13–3.15",
 }
 
 # ---------------------------------------------------------------- terminal output
@@ -109,7 +131,7 @@ def enable_windows_colors() -> bool:
         return bool(
             kernel32.SetConsoleMode(handle, mode.value | 0x0004)
         )  # VT processing
-    except (AttributeError, OSError):
+    except AttributeError, OSError:
         return False
 
 
@@ -151,14 +173,14 @@ def rel(path: Path) -> str:
 
 # ---------------------------------------------------------------- exercises
 
-TEST_FILE = re.compile(r"test_ex(\d\d)_(\d)_\w+\.py")
-README_FILE = re.compile(r"ex(\d\d)_(\d)_\w+\.md")
+TEST_FILE = re.compile(r"test_ex(?:(\d\d)|_([a-z][a-z0-9]*))_(\d)_\w+\.py")
+README_FILE = re.compile(r"ex(?:(\d\d)|_([a-z][a-z0-9]*))_(\d)_\w+\.md")
 
 
 @dataclass
 class Exercise:
     id: str
-    lesson: int
+    lesson: str
     task: int
     path: Path  # the test file, or the README for exercises you check yourself
 
@@ -171,8 +193,17 @@ class Exercise:
         return next(s for s, (_, lessons) in SECTIONS.items() if self.lesson in lessons)
 
     @property
+    def number(self) -> str:
+        lessons = SECTIONS[self.section][1]
+        return f"{self.section}.{lessons.index(self.lesson) + 1}"
+
+    @property
+    def display_id(self) -> str:
+        return f"{self.number}-{self.task}"
+
+    @property
     def title(self) -> str:
-        return f"Lesson {self.lesson:02d} · {LESSONS[self.lesson]}"
+        return f"Lesson {self.number} · {LESSONS[self.lesson]}"
 
 
 def discover() -> list[Exercise]:
@@ -181,9 +212,17 @@ def discover() -> list[Exercise]:
         for path in sorted(lesson_dir.iterdir()):
             match = TEST_FILE.fullmatch(path.name) or README_FILE.fullmatch(path.name)
             if match:
-                lesson, task = int(match.group(1)), int(match.group(2))
-                found.append(Exercise(f"{lesson:02d}-{task}", lesson, task, path))
-    return sorted(found, key=lambda e: (e.lesson, e.task))
+                lesson = match.group(1) or match.group(2)
+                task = int(match.group(3))
+                if lesson is None or lesson not in LESSONS:
+                    raise SystemExit(f"Unknown lesson {lesson!r} in {rel(path)}")
+                found.append(Exercise(f"{lesson}-{task}", lesson, task, path))
+    order = {
+        lesson: (section, position)
+        for section, (_, lessons) in SECTIONS.items()
+        for position, lesson in enumerate(lessons)
+    }
+    return sorted(found, key=lambda e: (*order[e.lesson], e.task))
 
 
 def edit_target(exercise: Exercise) -> tuple[Path, str]:
@@ -198,13 +237,14 @@ def edit_target(exercise: Exercise) -> tuple[Path, str]:
 
 def find_docstring(path: Path, dotted_name: str) -> str:
     """The docstring of `Class.method`, `function` or (for an empty name) the module."""
-    node: ast.AST = ast.parse(path.read_text(encoding="utf-8"))
+    node: ast.Module | ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef = (
+        ast.parse(path.read_text(encoding="utf-8"))
+    )
     for part in filter(None, dotted_name.split(".")):
-        children = getattr(node, "body", [])
-        node = next(
+        child_node = next(
             (
                 child
-                for child in children
+                for child in node.body
                 if isinstance(
                     child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
                 )
@@ -212,15 +252,16 @@ def find_docstring(path: Path, dotted_name: str) -> str:
             ),
             None,
         )
-        if node is None:
+        if child_node is None:
             return f"(couldn't find {dotted_name} in {path.name}; did it get renamed?)"
+        node = child_node
     return ast.get_docstring(node) or "(no docstring)"
 
 
 def describe(exercise: Exercise, position: int, total: int) -> None:
     print()
     print(bold(f"━━ {exercise.title} " + "━" * max(4, 60 - len(exercise.title))))
-    print(f"Exercise {bold(exercise.id)}  {dim(f'({position} of {total})')}")
+    print(f"Exercise {bold(exercise.display_id)}  {dim(f'({position} of {total})')}")
     if exercise.manual:
         print(f"Instructions: {rel(exercise.path)}")
         print()
@@ -273,7 +314,7 @@ def load_progress() -> dict[str, str]:
         return dict(data.get("completed", {}))
     except FileNotFoundError:
         return {}
-    except (json.JSONDecodeError, AttributeError):
+    except json.JSONDecodeError, AttributeError:
         sys.exit(
             f"{PROGRESS_FILE.name} is damaged. Fix it by hand or run: uv run course.py --reset"
         )
@@ -305,7 +346,7 @@ def show_finished(total: int) -> None:
     print()
     print(green(bold(f"All {total} exercises done. Congratulations!")))
     print(
-        "Run any exercise again with: uv run course.py <id>, for example uv run course.py 03-2"
+        "Run any exercise again with: uv run course.py <id>, for example uv run course.py 1.3-2"
     )
 
 
@@ -324,7 +365,7 @@ def check(
             answer = input(bold("Done with it? Mark it as complete [y/N] "))
             if answer.strip().lower() in ("y", "yes"):
                 mark_done(exercise, completed)
-                print(green(f"✓ {exercise.id} done."))
+                print(green(f"✓ {exercise.display_id} done."))
                 return after_pass(exercises, completed)
         print(f"When you're done, run: {bold('uv run course.py --done')}")
         return 0
@@ -335,7 +376,7 @@ def check(
         print(output.rstrip())
         print()
         print(
-            red(bold(f"✗ {exercise.id} isn't passing yet."))
+            red(bold(f"✗ {exercise.display_id} isn't passing yet."))
             + " Edit the file above and run "
             + bold("uv run course.py")
             + " again."
@@ -343,7 +384,7 @@ def check(
         return 1
     summary = output.strip().splitlines()[-1] if output.strip() else ""
     summary = re.sub(r"\x1b\[[0-9;]*m", "", summary)  # drop pytest's colors
-    print(green(bold(f"✓ {exercise.id} passes!")) + dim(f"  {summary}"))
+    print(green(bold(f"✓ {exercise.display_id} passes!")) + dim(f"  {summary}"))
     mark_done(exercise, completed)
     return after_pass(exercises, completed)
 
@@ -375,11 +416,11 @@ def cmd_one(
     wanted = exercise_id.strip()
     if re.fullmatch(r"\d-\d", wanted):
         wanted = "0" + wanted
-    exercise = next((e for e in exercises if e.id == wanted), None)
+    exercise = next((e for e in exercises if wanted in (e.id, e.display_id)), None)
     if exercise is None:
         print(
             red(f"No exercise called {exercise_id!r}.")
-            + " Ids look like 03-2; see uv run course.py --list"
+            + " Ids look like 1.3-2; see uv run course.py --list"
         )
         return 2
     return check(exercise, exercises, completed)
@@ -392,25 +433,27 @@ def cmd_done(exercises: list[Exercise], completed: dict[str, str]) -> int:
         return 0
     if not current.manual:
         print(
-            f"Exercise {current.id} is checked by its tests. Run {bold('uv run course.py')} to check it."
+            f"Exercise {current.display_id} is checked by its tests. Run {bold('uv run course.py')} to check it."
         )
         return 1
     mark_done(current, completed)
-    print(green(f"✓ {current.id} marked as done."))
+    print(green(f"✓ {current.display_id} marked as done."))
     return after_pass(exercises, completed)
 
 
 def cmd_list(exercises: list[Exercise], completed: dict[str, str]) -> int:
     current = next_exercise(exercises, completed)
-    by_lesson: dict[int, list[Exercise]] = {}
+    by_lesson: dict[str, list[Exercise]] = {}
     for exercise in exercises:
         by_lesson.setdefault(exercise.lesson, []).append(exercise)
     for section, (name, lessons) in SECTIONS.items():
         print()
         print(bold(f"{section}. {name}"))
         for lesson in lessons:
+            if lesson not in by_lesson:
+                continue
             cells = []
-            for exercise in by_lesson.get(lesson, []):
+            for exercise in by_lesson[lesson]:
                 if exercise.id in completed:
                     mark = green("✓")
                 elif exercise is current:
@@ -418,8 +461,9 @@ def cmd_list(exercises: list[Exercise], completed: dict[str, str]) -> int:
                 else:
                     mark = dim("·")
                 kind = "*" if exercise.manual else " "
-                cells.append(f"{mark} {exercise.id}{dim(kind)}")
-            print(f"  {lesson:02d}  {LESSONS[lesson]:<40} {'  '.join(cells)}")
+                cells.append(f"{mark} {exercise.display_id}{dim(kind)}")
+            number = by_lesson[lesson][0].number
+            print(f"  {number:<5} {LESSONS[lesson]:<40} {'  '.join(cells)}")
     print()
     print(
         dim("✓ done   ▶ next   · to do   * checked by you (README) instead of by tests")
@@ -446,7 +490,7 @@ def cmd_progress(exercises: list[Exercise], completed: dict[str, str]) -> int:
         print(green("Everything is done."))
     else:
         print(
-            f"Next up: {bold(current.id)}, {current.title}. Run {bold('uv run course.py')}"
+            f"Next up: {bold(current.display_id)}, {current.title}. Run {bold('uv run course.py')}"
         )
     return 0
 
@@ -478,22 +522,26 @@ def cmd_verify(exercises: list[Exercise]) -> int:
             answer = SOLUTIONS / exercise.path.parent.name / exercise.path.name
             ok = answer.exists()
             if not ok:
-                problems.append(f"{exercise.id}: missing {rel(answer)}")
-            print(f"{exercise.id}  README  answer {'ok' if ok else red('missing')}")
+                problems.append(f"{exercise.display_id}: missing {rel(answer)}")
+            print(
+                f"{exercise.display_id}  README  answer {'ok' if ok else red('missing')}"
+            )
             continue
         stub_passes, _ = run_tests(exercise)
         solution_passes, output = run_tests(exercise, solutions=True)
         if stub_passes:
             problems.append(
-                f"{exercise.id}: the tests pass against exercises/ (expected them to fail)"
+                f"{exercise.display_id}: the tests pass against exercises/ (expected them to fail)"
             )
         if not solution_passes:
             problems.append(
-                f"{exercise.id}: the tests fail against solutions/\n{output}"
+                f"{exercise.display_id}: the tests fail against solutions/\n{output}"
             )
         stub_text = green("fails") if not stub_passes else red("PASSES")
         solution_text = green("passes") if solution_passes else red("FAILS")
-        print(f"{exercise.id}  tests  stub {stub_text}  solution {solution_text}")
+        print(
+            f"{exercise.display_id}  tests  stub {stub_text}  solution {solution_text}"
+        )
     print()
     if problems:
         print(red(bold(f"{len(problems)} problem(s):")))
@@ -519,7 +567,7 @@ def main(argv: list[str] | None = None) -> int:
         "shows the next exercise and runs its tests.",
     )
     parser.add_argument(
-        "exercise", nargs="?", help="check one exercise by its id, for example 03-2"
+        "exercise", nargs="?", help="check one exercise by its id, for example 1.3-2"
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(

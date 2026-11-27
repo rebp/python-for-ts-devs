@@ -79,7 +79,7 @@ p code,li code,td code,.task-text code,figcaption code,summary code{font-size:.8
 .nav-section summary:hover,.nav-section[open] summary{color:var(--ink)}
 .nav-section summary .num{margin-inline:4px 5px}
 .nav-list{list-style:none;margin:0;padding:0}
-.nav-list a{display:grid;grid-template-columns:24px minmax(0,1fr) 14px;gap:6px;align-items:baseline;padding:7px 8px;border-radius:6px;text-decoration:none;color:var(--ink);line-height:1.35;overflow-wrap:anywhere}
+.nav-list a{display:grid;grid-template-columns:40px minmax(0,1fr) 14px;gap:6px;align-items:baseline;padding:7px 8px;border-radius:6px;text-decoration:none;color:var(--ink);line-height:1.35;overflow-wrap:anywhere}
 .nav-list a:hover{background:var(--code-bg)}
 .nav-list a[aria-current="page"]{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent);font-weight:650}
 .num{font-family:var(--mono);font-size:12px;color:var(--muted)}
@@ -337,7 +337,7 @@ pre{margin:0;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.6;
         <div class="lesson-search">
           <label for="lessonSearch">Find a lesson</label>
           <div class="search-field">
-            <input id="lessonSearch" type="search" placeholder="e.g. async or 29" autocomplete="off">
+            <input id="lessonSearch" type="search" placeholder="e.g. async or 8.1" autocomplete="off">
             <button type="button" class="btn-quiet" id="clearSearch" hidden>Clear</button>
           </div>
         </div>
@@ -361,10 +361,10 @@ pre{margin:0;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.6;
     <h1>Learn Python <em>through TypeScript.</em></h1>
     <p class="lead">Start with the code you already know. Compare it with Python, understand what works differently, and put it into practice.</p>
     <div class="hero-actions">
-      <a class="btn btn-primary" id="startBtn" href="#lesson-01">Start lesson 1</a>
+      <a class="btn btn-primary" id="startBtn" href="#lesson-01">Start lesson 1.1</a>
       <a class="jump-link" href="#curriculum">Browse the curriculum</a>
     </div>
-    <p class="hero-note" id="homeProg">8 modules · 40 lessons · 120 exercises</p>
+    <p class="hero-note" id="homeProg">13 topics · 40 lessons · 120 exercises</p>
     <figure class="hero-preview">
       <figcaption>Same task: keep the adults</figcaption>
       <div class="compare">
@@ -452,7 +452,7 @@ print("TypeScript")</code></pre></details>
 year = 2019
 print(f"I've lived in {city} since {year}")</code></pre></details>
       <label class="done"><input type="checkbox"> Done</label></li>
-    <li class="task" data-task="01-3"><p class="task-text">Open the REPL and evaluate <code>2 ** 10</code>, <code>7 / 2</code> and <code>7 // 2</code>. Write down what each one does.</p>
+    <li class="task" data-task="01-3" data-manual><p class="task-text">Open the REPL and evaluate <code>2 ** 10</code>, <code>7 / 2</code> and <code>7 // 2</code>. Write down what each one does.</p>
       <details><summary>Solution</summary><pre><code class="language-python">&gt;&gt;&gt; 2 ** 10   # 1024: power, like Math.pow or **
 &gt;&gt;&gt; 7 / 2     # 3.5: division always returns a float
 &gt;&gt;&gt; 7 // 2    # 3: floor division, like Math.floor(7 / 2)</code></pre></details>
@@ -483,7 +483,7 @@ total = count * price</code></pre></div>
     <li>Floats behave like JavaScript numbers: <code>0.1 + 0.2</code> is <code>0.30000000000000004</code>. For money, use <code>decimal.Decimal("0.10")</code>. And <code>round()</code> rounds halves to the nearest even number: <code>round(2.5)</code> is <code>2</code>, while <code>Math.round(2.5)</code> is 3.</li>
     <li>Booleans are <code>True</code> and <code>False</code>, capitalized. Logic uses words: <code>and</code>, <code>or</code>, <code>not</code>.</li>
     <li>Python won’t mix strings and numbers in arithmetic. Convert explicitly with <code>int("3")</code>, <code>str(3)</code> or <code>float("2.5")</code>. Compatible numeric types can still mix: <code>3 + 0.5</code> produces the float <code>3.5</code>.</li>
-    <li>Type hints are optional and ignored at runtime. A type checker (lesson 21) reads them, like <code>tsc</code>.</li>
+    <li>Type hints are optional and ignored at runtime. A type checker (lesson 5.3) reads them, like <code>tsc</code>.</li>
   </ul>
   <h2>See it</h2>
   <figure class="figure">
@@ -511,7 +511,7 @@ print(minutes / 2)   # 3.5 (division returns a float)
 print(minutes // 2)  # 3 (floor division rounds down)
 print(minutes % 2)   # 1 (remainder)
 print(-minutes // 2) # -4 (down, not toward zero)</code></pre>
-  <p>Unlike JavaScript’s <code>parseInt("7min", 10)</code>, <code>int("7min")</code> doesn’t accept a numeric prefix; it raises <code>ValueError</code>. If such input is expected, handle it where you parse it (see <a href="#lesson-18">Lesson 18 on exceptions</a>).</p>
+  <p>Unlike JavaScript’s <code>parseInt("7min", 10)</code>, <code>int("7min")</code> doesn’t accept a numeric prefix; it raises <code>ValueError</code>. If such input is expected, handle it where you parse it (see <a href="#lesson-18">Lesson 4.5 on exceptions</a>).</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="02-1"><p class="task-text">Create variables for a product name, a price and a quantity. Print the total with exactly two decimals.</p>
@@ -564,7 +564,7 @@ total(1, 2, 3)</code></pre></div>
     <li>Keyword arguments, <code>greet(name="Ada")</code>, replace the “options object” pattern you use in TS.</li>
     <li><code>*args</code> collects extra positional arguments into a tuple (rest parameters). <code>**kwargs</code> collects extra keyword arguments into a dict.</li>
     <li>Spread works too: <code>total(*[1, 2, 3])</code> and <code>greet(**{"name": "Ada"})</code>.</li>
-    <li>A <code>lambda</code> is a one-expression function, useful inline as a callback (see <a href="#lesson-25">Lesson 25</a>). Use <code>def</code> for a named function.</li>
+    <li>A <code>lambda</code> is a one-expression function, useful inline as a callback (see <a href="#lesson-25">Lesson 7.1</a>). Use <code>def</code> for a named function.</li>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
@@ -745,7 +745,7 @@ print(a is b)             # True</code></pre></div>
     <li>Assignment adds another name to the same object. Nothing is copied, ever, unless you ask for a copy.</li>
     <li><code>a is b</code> asks “same object?”, like <code>===</code> on objects. <code>id(a)</code> shows an object’s identity number.</li>
     <li>Function arguments are passed the same way: the function receives a name for your object. It can change the object, but reassigning its parameter doesn’t affect your variable.</li>
-    <li>Numbers and strings are objects too, but they can’t be changed (lesson 06), so sharing them is always safe.</li>
+    <li>Numbers and strings are objects too, but they can’t be changed (lesson 2.2), so sharing them is always safe.</li>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
@@ -782,7 +782,7 @@ print(result)    # ['typescript']</code></pre>
   <p>Use a return value when callers should decide whether to replace their data. If a function promises not to mutate its inputs, build a new result rather than appending to the input.</p>
   <h2>Practice</h2>
   <ol class="tasks">
-    <li class="task" data-task="05-1"><p class="task-text">Predict the output, then run it:</p><pre><code class="language-python">def add_item(cart, item):
+    <li class="task" data-task="05-1" data-manual><p class="task-text">Predict the output, then run it:</p><pre><code class="language-python">def add_item(cart, item):
     cart.append(item)
 
 cart = []
@@ -790,7 +790,7 @@ add_item(cart, "apple")
 print(cart)</code></pre>
       <details><summary>Solution</summary><p><code>['apple']</code>. The function received a name for the same list and changed it.</p></details>
       <label class="done"><input type="checkbox"> Done</label></li>
-    <li class="task" data-task="05-2"><p class="task-text">Predict the output, then run it:</p><pre><code class="language-python">def reset(cart):
+    <li class="task" data-task="05-2" data-manual><p class="task-text">Predict the output, then run it:</p><pre><code class="language-python">def reset(cart):
     cart = []
 
 cart = ["apple"]
@@ -954,7 +954,7 @@ for v in [0, "", [], [0], None]:
 
 print(get_port({}), get_port({"port": None}), get_port({"port": 0}))  # 8080 8080 0</code></pre></details>
       <label class="done"><input type="checkbox"> Done</label></li>
-    <li class="task" data-task="07-3"><p class="task-text">Explain why <code>0 or 8080</code> returns 8080, and when using <code>or</code> for defaults becomes a bug.</p>
+    <li class="task" data-task="07-3" data-manual><p class="task-text">Explain why <code>0 or 8080</code> returns 8080, and when using <code>or</code> for defaults becomes a bug.</p>
       <details><summary>Solution</summary><p><code>or</code> returns the first truthy operand, and 0 is falsy. It’s a bug whenever a falsy value is valid: a count of 0, an empty string the user typed on purpose, an empty list. Compare with <code>None</code> instead.</p></details>
       <label class="done"><input type="checkbox"> Done</label></li>
   </ol>
@@ -1044,7 +1044,7 @@ print(existing)  # ['typescript']</code></pre>
 counter = make_counter()
 print(counter(), counter(), counter())  # 1 2 3</code></pre></details>
       <label class="done"><input type="checkbox"> Done</label></li>
-    <li class="task" data-task="08-3"><p class="task-text">Predict what happens, then run it:</p><pre><code class="language-python">x = 10
+    <li class="task" data-task="08-3" data-manual><p class="task-text">Predict what happens, then run it:</p><pre><code class="language-python">x = 10
 
 def show():
     print(x)
@@ -1169,7 +1169,7 @@ print(isinstance(audited, Account))  # True</code></pre></div>
   </ul>
   <aside class="trap"><strong>TS trap</strong><p>If you write a subclass <code>__init__</code>, Python neither calls the base initializer automatically nor requires you to call it. Forget <code>super().__init__(owner)</code> here and <code>owner</code> and <code>_balance</code> won’t be set, so the first deposit will raise <code>AttributeError</code>.</p></aside>
   <p>Unlike TypeScript, Python allows multiple base classes. With more than one, <code>super()</code> follows the method resolution order (MRO), which you can inspect with <code>SomeClass.mro()</code>.</p>
-  <p>Inherit when the subclass can stand in for the base class: an <code>AuditedAccount</code> is an <code>Account</code>. If a report merely uses an account, give the report an <code>Account</code> attribute instead (composition). If callers only care that an object provides certain methods or attributes, see <a href="#lesson-13">Lesson 13 on protocols</a>.</p>
+  <p>Inherit when the subclass can stand in for the base class: an <code>AuditedAccount</code> is an <code>Account</code>. If a report merely uses an account, give the report an <code>Account</code> attribute instead (composition). If callers only care that an object provides certain methods or attributes, see <a href="#lesson-13">Lesson 3.5 on protocols</a>.</p>
   <h2>Alternate constructors</h2>
   <p>An instance method receives <code>self</code>; a <code>@classmethod</code> receives the class as <code>cls</code>. Use it for named alternate constructors. Unlike hard-coding a class name, calling <code>cls(...)</code> also works when a subclass inherits the method and accepts the same initializer arguments. A <code>@staticmethod</code> receives neither <code>self</code> nor <code>cls</code>; often a module-level function is simpler.</p>
   <pre><code class="language-python">class Temperature:
@@ -1242,7 +1242,7 @@ class User:
   <ul class="points">
     <li>The <code>@dataclass</code> decorator reads the annotated fields and generates <code>__init__</code>, <code>__repr__</code> and <code>__eq__</code>.</li>
     <li><code>frozen=True</code> makes instances read-only, like <code>Readonly&lt;T&gt;</code> but enforced at runtime.</li>
-    <li>Mutable defaults need <code>field(default_factory=list)</code>. That’s lesson 08’s trap, solved properly.</li>
+    <li>Mutable defaults need <code>field(default_factory=list)</code>. That’s lesson 2.4’s trap, solved properly.</li>
     <li>Instances aren’t dicts: you write <code>p.x</code>, not <code>p["x"]</code>. Convert with <code>dataclasses.asdict(p)</code> when you need a dict, for example for JSON.</li>
   </ul>
   <h2>See it</h2>
@@ -1400,7 +1400,7 @@ status = Status("draft")
 print(status.name, status.value)      # DRAFT draft
 print(Status["DRAFT"] is status)      # True
 print(can_edit(status))               # True</code></pre>
-  <p><code>Status("archived")</code> raises <code>ValueError</code>; <code>Status["ARCHIVED"]</code> raises <code>KeyError</code>. At a JSON boundary, read the string into an enum member and write <code>status.value</code> back out. For a choice that only needs static checking, compare <code>Literal</code> in <a href="#lesson-14">Lesson 14</a>.</p>
+  <p><code>Status("archived")</code> raises <code>ValueError</code>; <code>Status["ARCHIVED"]</code> raises <code>KeyError</code>. At a JSON boundary, read the string into an enum member and write <code>status.value</code> back out. For a choice that only needs static checking, compare <code>Literal</code> in <a href="#lesson-14">Lesson 3.6</a>.</p>
   <h2>Capture values and guard a case</h2>
   <p>A bare name in a pattern captures a value: <code>case draft:</code> binds <code>draft</code>, it doesn’t compare with a variable of that name. Use a literal or a qualified member such as <code>case Status.DRAFT:</code> when you mean a specific value. A guard checks an extra condition <em>after</em> the pattern matches.</p>
   <pre><code class="language-python">def describe(event: dict[str, object]) -&gt; str:
@@ -1580,7 +1580,7 @@ print(user.age)  # 36, converted to int</code></pre></div>
     <li>Python’s types are nominal by default. A <code>Protocol</code> makes them structural: any object with a <code>name: str</code> fits <code>HasName</code>, no inheritance needed.</li>
     <li>Type hints never validate at runtime. Pydantic does: it parses dicts (for example, JSON) into typed objects and raises a <code>ValidationError</code> listing every problem.</li>
     <li>By default Pydantic converts compatible values, like <code>"36"</code> to <code>36</code>. Use strict mode to refuse that.</li>
-    <li>Install it with <code>uv add pydantic</code>. FastAPI (lesson 33) uses it for every request.</li>
+    <li>Install it with <code>uv add pydantic</code>. FastAPI (lesson 10.1) uses it for every request.</li>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
@@ -1712,11 +1712,11 @@ class Box[T]:
   <ul class="points">
     <li>Generics use square brackets: <code>def first[T](...)</code> and <code>class Box[T]</code> (Python 3.12 and later). Older code declares <code>T = TypeVar("T")</code> and writes <code>class Box(Generic[T])</code>. It means the same thing, and you’ll see it a lot.</li>
     <li><code>Literal["asc", "desc"]</code> is a string literal union, and the <code>type</code> statement creates an alias, like <code>type</code> in TypeScript.</li>
-    <li><code>TypedDict</code> types a plain dict with known keys, the closest thing to an <code>interface</code> for JSON-shaped data. <code>NotRequired[str]</code> is <code>email?: string</code>. It doesn’t validate anything at runtime, so untrusted input still goes through Pydantic (lesson 13).</li>
+    <li><code>TypedDict</code> types a plain dict with known keys, the closest thing to an <code>interface</code> for JSON-shaped data. <code>NotRequired[str]</code> is <code>email?: string</code>. It doesn’t validate anything at runtime, so untrusted input still goes through Pydantic (lesson 3.5).</li>
     <li><code>Callable[[User], str]</code> is <code>(user: User) =&gt; string</code>, and <code>Callable[..., str]</code> accepts any arguments.</li>
     <li><code>Any</code> is <code>any</code>: it switches checking off. <code>object</code> is <code>unknown</code>: anything fits, but you must narrow it with <code>isinstance</code> before using it. <code>cast(User, data)</code> is <code>data as User</code>, with no runtime check.</li>
     <li><code>@overload</code> declares several signatures for one function, <code>Final</code> marks a name that must not be reassigned, and <code>Self</code> is the return type of a method that returns its own instance, for chaining.</li>
-    <li><code>mypy --strict</code> (or pyright’s strict mode) is <code>"strict": true</code>. It requires every function to be annotated and reports hidden <code>Any</code>s. Set <code>strict = true</code> under <code>[tool.mypy]</code> in <code>pyproject.toml</code> (lesson 21).</li>
+    <li><code>mypy --strict</code> (or pyright’s strict mode) is <code>"strict": true</code>. It requires every function to be annotated and reports hidden <code>Any</code>s. Set <code>strict = true</code> under <code>[tool.mypy]</code> in <code>pyproject.toml</code> (lesson 5.3).</li>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
@@ -2285,19 +2285,19 @@ uvx some-tool</code></pre></div>
   <p>In CI, use <code>uv sync --locked</code> to fail if <code>uv.lock</code> is out of date rather than silently resolving a new environment. Keep <code>pyproject.toml</code> and <code>uv.lock</code> in the same change when you add or update a dependency.</p>
   <h2>Practice</h2>
   <ol class="tasks">
-    <li class="task" data-task="20-1"><p class="task-text">Install uv, run <code>uv init hello-uv</code>, and run the generated <code>main.py</code> with <code>uv run main.py</code>.</p>
+    <li class="task" data-task="20-1" data-manual><p class="task-text">Install uv, run <code>uv init hello-uv</code>, and run the generated <code>main.py</code> with <code>uv run main.py</code>.</p>
       <details><summary>Solution</summary><pre><code class="language-bash">uv init hello-uv
 cd hello-uv
 uv run main.py   # prints "Hello from hello-uv!"</code></pre></details>
       <label class="done"><input type="checkbox"> Done</label></li>
-    <li class="task" data-task="20-2"><p class="task-text">Add the <code>httpx</code> package, open <code>pyproject.toml</code>, and find where it was recorded. Then write a script that prints the status code of a request to <code>https://example.com</code>.</p>
+    <li class="task" data-task="20-2" data-manual><p class="task-text">Add the <code>httpx</code> package, open <code>pyproject.toml</code>, and find where it was recorded. Then write a script that prints the status code of a request to <code>https://example.com</code>.</p>
       <details><summary>Solution</summary><pre><code class="language-python"># after: uv add httpx  (it appears under [project] dependencies)
 import httpx
 
 response = httpx.get("https://example.com")
 print(response.status_code)  # 200</code></pre></details>
       <label class="done"><input type="checkbox"> Done</label></li>
-    <li class="task" data-task="20-3"><p class="task-text">Add pytest as a development dependency and run it. With no tests yet, read what it reports.</p>
+    <li class="task" data-task="20-3" data-manual><p class="task-text">Add pytest as a development dependency and run it. With no tests yet, read what it reports.</p>
       <details><summary>Solution</summary><pre><code class="language-bash">uv add --dev pytest
 uv run pytest     # "no tests ran", which is expected for now</code></pre></details>
       <label class="done"><input type="checkbox"> Done</label></li>
@@ -2354,20 +2354,20 @@ uv run mypy app.py</code></pre>
   <p>The first checks layout without rewriting the file. The second catches lint issues such as unused imports. The third catches type mismatches such as passing a string to an argument annotated <code>int</code>. If formatting is the only failure, run <code>uv run ruff format app.py</code> to apply it.</p>
   <h2>Practice</h2>
   <ol class="tasks">
-    <li class="task" data-task="21-1"><p class="task-text">Write a function with a deliberate type error, run <code>uv run mypy --strict .</code>, read the message, and fix the code.</p>
+    <li class="task" data-task="21-1" data-manual><p class="task-text">Write a function with a deliberate type error, run <code>uv run mypy --strict .</code>, read the message, and fix the code.</p>
       <details><summary>Solution</summary><pre><code class="language-python">def greet(name: str) -&gt; str:
     return "Hi " + name
 
 greet(42)  # mypy: incompatible type "int"; expected "str"
 greet("42")  # fixed</code></pre></details>
       <label class="done"><input type="checkbox"> Done</label></li>
-    <li class="task" data-task="21-2"><p class="task-text">Create a file with an unused import and an unused variable. Run <code>ruff check .</code>, then <code>ruff check --fix .</code>, and compare.</p>
+    <li class="task" data-task="21-2" data-manual><p class="task-text">Create a file with an unused import and an unused variable. Run <code>ruff check .</code>, then <code>ruff check --fix .</code>, and compare.</p>
       <details><summary>Solution</summary><pre><code class="language-python">import os        # F401: imported but unused, removed by --fix
 
 def f() -&gt; None:
     x = 1        # F841: assigned but never used, reported for you to fix</code></pre></details>
       <label class="done"><input type="checkbox"> Done</label></li>
-    <li class="task" data-task="21-3"><p class="task-text">Configure ruff in <code>pyproject.toml</code> to allow lines up to 100 characters and to also check import sorting.</p>
+    <li class="task" data-task="21-3" data-manual><p class="task-text">Configure ruff in <code>pyproject.toml</code> to allow lines up to 100 characters and to also check import sorting.</p>
       <details><summary>Solution</summary><pre><code class="language-toml">[tool.ruff]
 line-length = 100
 
@@ -2377,7 +2377,7 @@ extend-select = ["I"]   # "I" = isort rules for import order</code></pre></detai
   </ol>
 </template>
 
-<template class="lesson" data-n="22" data-section="5" data-title="Testing with pytest" data-summary="Plain asserts, parametrized tests and fixtures instead of beforeEach.">
+<template class="lesson" data-n="22" data-section="6" data-title="Testing with pytest" data-summary="Plain asserts, parametrized tests and fixtures instead of beforeEach.">
   <p class="lead">pytest feels lighter than Vitest or Jest: tests are plain functions and checks are plain <code>assert</code> statements.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript (Vitest)</div><pre><code class="language-typescript">import { it, expect } from "vitest";
@@ -2447,7 +2447,7 @@ def test_text_round_trip(tmp_path, text):
   <p>Save this as <code>test_text.py</code> and run <code>uv run pytest test_text.py -v</code>. You’ll see two separate test cases, so a failure tells you which input to investigate.</p>
   <h2>Practice</h2>
   <ol class="tasks">
-    <li class="task" data-task="22-1"><p class="task-text">Write tests for your <code>slugify</code> from lesson 16, including one parametrized test with at least three cases.</p>
+    <li class="task" data-task="22-1"><p class="task-text">Write tests for your <code>slugify</code> from lesson 4.2, including one parametrized test with at least three cases.</p>
       <details><summary>Solution</summary><pre><code class="language-python">import pytest
 from slugify import slugify
 
@@ -2485,7 +2485,7 @@ def test_withdraw(account):
   </ol>
 </template>
 
-<template class="lesson" data-n="23" data-section="5" data-title="Mocking and test doubles" data-summary="unittest.mock, patch and monkeypatch for jest.fn() and vi.mock users, and when a fake is better.">
+<template class="lesson" data-n="23" data-section="6" data-title="Mocking and test doubles" data-summary="unittest.mock, patch and monkeypatch for jest.fn() and vi.mock users, and when a fake is better.">
   <p class="lead">Python’s answer to <code>jest.fn()</code> and <code>vi.mock</code> is <code>unittest.mock</code>, in the standard library. A <code>Mock</code> records every call, <code>patch</code> swaps a name for the length of one test, and pytest’s <code>monkeypatch</code> fixture covers attributes and environment variables. The one big difference from Jest is where you patch.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript (Vitest)</div><pre><code class="language-typescript">import { vi, test, expect } from "vitest";
@@ -2622,7 +2622,7 @@ def test_twenty_degrees_is_warm(monkeypatch):
   </ol>
 </template>
 
-<template class="lesson" data-n="24" data-section="5" data-title="Debugging" data-summary="Tracebacks read bottom-up, breakpoint() instead of debugger, and the VS Code debugger.">
+<template class="lesson" data-n="24" data-section="6" data-title="Debugging" data-summary="Tracebacks read bottom-up, breakpoint() instead of debugger, and the VS Code debugger.">
   <p class="lead">Debugging Python feels familiar: there’s a statement that pauses the program, a debugger in VS Code, and stack traces when things go wrong. The one real surprise is the stack trace. Python prints it upside down compared with JavaScript, so you need to read it from the bottom.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">function toCents(price: string) {
@@ -2649,10 +2649,10 @@ def test_twenty_degrees_is_warm(monkeypatch):
     <li><code>breakpoint()</code> is Python’s <code>debugger</code> statement, but it always stops, even with no debugger attached: you land in pdb, a debugger in the terminal. Set <code>PYTHONBREAKPOINT=0</code> to turn every <code>breakpoint()</code> off, and let ruff’s <code>T10</code> rules catch the ones you forgot to delete.</li>
     <li>At the <code>(Pdb)</code> prompt you can type any Python expression, not just commands: <code>p len(rows)</code>, <code>pp order</code>, even <code>price = "0"</code> to try a fix without restarting.</li>
     <li>A traceback says <em>most recent call last</em>: the oldest call is at the top and the line that failed is at the bottom, right above the error message. A JavaScript stack trace is the other way round.</li>
-    <li>A chained error prints two tracebacks. <em>The above exception was the direct cause of the following exception</em> means someone wrapped it with <code>raise ... from err</code> (lesson 18). <em>During handling of the above exception, another exception occurred</em> usually means a bug inside an <code>except</code> block. The root cause is in the first one.</li>
-    <li>In tests, <code>uv run pytest -x --pdb</code> stops at the first failure and opens pdb right where it failed (lesson 22). <code>--lf</code> reruns only the tests that failed last time.</li>
+    <li>A chained error prints two tracebacks. <em>The above exception was the direct cause of the following exception</em> means someone wrapped it with <code>raise ... from err</code> (lesson 4.5). <em>During handling of the above exception, another exception occurred</em> usually means a bug inside an <code>except</code> block. The root cause is in the first one.</li>
+    <li>In tests, <code>uv run pytest -x --pdb</code> stops at the first failure and opens pdb right where it failed (lesson 6.1). <code>--lf</code> reruns only the tests that failed last time.</li>
     <li>To debug a FastAPI app in VS Code, add a <code>launch.json</code> entry with <code>"type": "debugpy"</code>, <code>"module": "uvicorn"</code> and <code>"args": ["main:app", "--reload"]</code>, then set breakpoints in your routes.</li>
-    <li>In production you get logs, not a debugger. <code>logger.exception("...")</code> inside an <code>except</code> block logs the whole traceback (lesson 37), and <code>traceback.format_exc()</code> gives it to you as a string. <code>python -X dev</code> turns on extra warnings, such as files you never closed.</li>
+    <li>In production you get logs, not a debugger. <code>logger.exception("...")</code> inside an <code>except</code> block logs the whole traceback (lesson 11.1), and <code>traceback.format_exc()</code> gives it to you as a string. <code>python -X dev</code> turns on extra warnings, such as files you never closed.</li>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
@@ -2713,7 +2713,7 @@ def root_cause(exc):
 </template>
 
 <!-- ================= SECTION 6 ================= -->
-<template class="lesson" data-n="25" data-section="6" data-title="Comprehensions and lambdas" data-summary="The Python way to map, filter and build collections in one readable line.">
+<template class="lesson" data-n="25" data-section="7" data-title="Comprehensions and lambdas" data-summary="The Python way to map, filter and build collections in one readable line.">
   <p class="lead">Where TypeScript chains <code>.filter().map()</code>, Python writes a comprehension: one expression that loops, filters and builds a list, dict or set.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">const prices = [5, 20, 50];
@@ -2786,7 +2786,7 @@ print(all(s &lt; 100 for s in scores))  # True</code></pre></details>
   </ol>
 </template>
 
-<template class="lesson" data-n="26" data-section="6" data-title="Iterators and generators" data-summary="yield, lazy sequences and processing data that doesn’t fit in memory.">
+<template class="lesson" data-n="26" data-section="7" data-title="Iterators and generators" data-summary="yield, lazy sequences and processing data that doesn’t fit in memory.">
   <p class="lead">Generators are TypeScript’s <code>function*</code>, but in Python they’re everywhere. They produce values one at a time, so you can process huge files or endless streams with almost no memory.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">function* countdown(n: number) {
@@ -2884,7 +2884,7 @@ print(list(islice(fibonacci(), 10)))  # [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]</code>
   </ol>
 </template>
 
-<template class="lesson" data-n="27" data-section="6" data-title="Decorators" data-summary="Functions that wrap functions, and the @ syntax you’ll see in every library.">
+<template class="lesson" data-n="27" data-section="7" data-title="Decorators" data-summary="Functions that wrap functions, and the @ syntax you’ll see in every library.">
   <p class="lead">A decorator is a function that takes a function and returns a new one. It’s the higher-order function pattern from TypeScript, with a dedicated <code>@</code> syntax.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">function logged&lt;A extends unknown[], R&gt;(
@@ -3009,7 +3009,7 @@ print(fib(32))  # instant with the cache; seconds without it</code></pre></detai
   </ol>
 </template>
 
-<template class="lesson" data-n="28" data-section="6" data-title="Context managers" data-summary="with blocks: setup and cleanup that can’t be forgotten.">
+<template class="lesson" data-n="28" data-section="7" data-title="Context managers" data-summary="with blocks: setup and cleanup that can’t be forgotten.">
   <p class="lead">A <code>with</code> block guarantees cleanup: the file gets closed, the lock released, the transaction finished, even if an error happens inside.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">import { open } from "node:fs/promises";
@@ -3125,7 +3125,7 @@ with Timer("sleep"):
 </template>
 
 <!-- ================= SECTION 7 ================= -->
-<template class="lesson" data-n="29" data-section="7" data-title="Async and await" data-summary="Same keywords as TypeScript, but you start the event loop yourself.">
+<template class="lesson" data-n="29" data-section="8" data-title="Async and await" data-summary="Same keywords as TypeScript, but you start the event loop yourself.">
   <p class="lead"><code>async</code> and <code>await</code> look identical to TypeScript, but Python has no event loop running by default. You start one, and you need async-friendly libraries for it to pay off.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">async function fetchAll(urls: string[]) {
@@ -3193,7 +3193,7 @@ async def main() -&gt; None:
 
 
 asyncio.run(main())</code></pre>
-  <p>If the second operation needs the first result, use two awaits instead. For concurrent work that should cancel its siblings on failure, see <code>TaskGroup</code> in <a href="#lesson-30">Lesson 30</a>.</p>
+  <p>If the second operation needs the first result, use two awaits instead. For concurrent work that should cancel its siblings on failure, see <code>TaskGroup</code> in <a href="#lesson-30">Lesson 8.3</a>.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="29-1"><p class="task-text">Write <code>async def say_after(text, seconds)</code> that sleeps and then prints. Run three of them at once with <code>gather</code> and time the total.</p>
@@ -3229,8 +3229,8 @@ asyncio.run(main())</code></pre></details>
   </ol>
 </template>
 
-<template class="lesson" data-n="30" data-section="7" data-title="Threads, processes and the GIL" data-summary="Real threads, a lock you didn’t need in Node, and processes for CPU-heavy work.">
-  <p class="lead">Node runs your JavaScript on one thread, and the only way to do two things at once is async I/O or a worker. Python has async too (lesson 29), but it also has real operating-system threads. In the default build, the GIL means threads speed up waiting, not Python computation. For heavy computation you can use processes.</p>
+<template class="lesson" data-n="30" data-section="8" data-title="Threads, processes and the GIL" data-summary="Real threads, a lock you didn’t need in Node, and processes for CPU-heavy work.">
+  <p class="lead">Node runs your JavaScript on one thread, and the only way to do two things at once is async I/O or a worker. Python has async too (lesson 8.1), but it also has real operating-system threads. In the default build, the GIL means threads speed up waiting, not Python computation. For heavy computation you can use processes.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript (Node)</div><pre><code class="language-typescript">// One thread runs your JS.
 // I/O is async; CPU work needs a worker.
@@ -3267,7 +3267,7 @@ if __name__ == "__main__":
     <li><code>ThreadPoolExecutor</code> runs blocking calls side by side. <code>pool.map(fn, items)</code> returns results in input order, like <code>Promise.all</code>, and the <code>with</code> block waits for every thread to finish.</li>
     <li><code>ProcessPoolExecutor</code> is the equivalent of <code>worker_threads</code> or <code>cluster</code>: separate processes, each with its own interpreter and GIL, so computation really runs in parallel. Arguments and results are pickled to cross between processes, and the start-up code must sit under <code>if __name__ == "__main__":</code>.</li>
     <li>Threads share every object, so shared state needs a <code>threading.Lock</code>. To hand work from one thread to another, use <code>queue.Queue</code>, which does its own locking, like <code>postMessage</code> between workers.</li>
-    <li>From async code, <code>await asyncio.to_thread(blocking_fn, arg)</code> runs a blocking call in a thread without freezing the event loop. FastAPI does the same for every plain <code>def</code> route (lesson 33).</li>
+    <li>From async code, <code>await asyncio.to_thread(blocking_fn, arg)</code> runs a blocking call in a thread without freezing the event loop. FastAPI does the same for every plain <code>def</code> route (lesson 10.1).</li>
     <li><code>async with asyncio.TaskGroup() as tg:</code> (Python 3.11) starts several tasks and waits for all of them. If one fails, it cancels the rest, which <code>Promise.all</code> never does.</li>
   </ul>
   <h2>See it</h2>
@@ -3275,12 +3275,12 @@ if __name__ == "__main__":
     <table class="truth plain">
       <thead><tr><th>The job</th><th>In Node</th><th>In Python</th></tr></thead>
       <tbody>
-        <tr><td>Many requests with an async library</td><td><code>Promise.all</code></td><td><code>asyncio.gather</code>, <code>TaskGroup</code> (lesson 29)</td></tr>
+        <tr><td>Many requests with an async library</td><td><code>Promise.all</code></td><td><code>asyncio.gather</code>, <code>TaskGroup</code> (lesson 8.1)</td></tr>
         <tr class="diff"><td>Many calls with a blocking library</td><td>Doesn’t happen: everything is async</td><td><code>ThreadPoolExecutor</code>, <code>asyncio.to_thread</code></td></tr>
         <tr><td>CPU-heavy work (hashing, resizing images, parsing)</td><td><code>worker_threads</code></td><td><code>ProcessPoolExecutor</code></td></tr>
         <tr><td>Passing work between threads</td><td><code>postMessage</code></td><td><code>queue.Queue</code></td></tr>
         <tr class="diff"><td>Protecting shared state</td><td>Not needed: one thread</td><td><code>threading.Lock</code></td></tr>
-        <tr><td>Several server processes</td><td><code>cluster</code>, pm2</td><td><code>uvicorn --workers</code> (lesson 37)</td></tr>
+        <tr><td>Several server processes</td><td><code>cluster</code>, pm2</td><td><code>uvicorn --workers</code> (lesson 11.1)</td></tr>
       </tbody>
     </table></div>
     <figcaption>Highlighted rows are the ones Node developers don’t have to think about.</figcaption>
@@ -3340,7 +3340,7 @@ async def load_reports(report_ids: list[int]) -&gt; dict[int, str]:
   </ol>
 </template>
 
-<template class="lesson" data-n="31" data-section="7" data-title="Files and data formats" data-summary="pathlib, JSON, CSV and XML with the standard library.">
+<template class="lesson" data-n="31" data-section="9" data-title="Files and data formats" data-summary="pathlib, JSON, CSV and XML with the standard library.">
   <p class="lead">Python’s standard library reads and writes the common data formats without installing anything. <code>pathlib</code> makes working with paths pleasant.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">import { readFile, writeFile } from "node:fs/promises";
@@ -3436,7 +3436,7 @@ for book in root.findall("book"):
   </ol>
 </template>
 
-<template class="lesson" data-n="32" data-section="7" data-title="Dates and times" data-summary="date, datetime and timedelta, aware vs naive values, time zones and ISO strings for JSON.">
+<template class="lesson" data-n="32" data-section="9" data-title="Dates and times" data-summary="date, datetime and timedelta, aware vs naive values, time zones and ISO strings for JSON.">
   <p class="lead">Python’s <code>datetime</code> module is what JavaScript’s <code>Date</code> should have been: immutable values, separate types for dates and durations, and real time zones in the standard library. The one thing to learn is the difference between naive and aware datetimes.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">const now = new Date();
@@ -3473,7 +3473,7 @@ sent.isoformat()
     <li>A datetime with a <code>tzinfo</code> is <em>aware</em>: it’s a real instant. One without is <em>naive</em>: just a wall-clock reading. Comparing or subtracting the two raises <code>TypeError: can't compare offset-naive and offset-aware datetimes</code>. Store and send aware UTC values, and convert to local time only for display.</li>
     <li>Use <code>datetime.now(UTC)</code>. The old <code>datetime.utcnow()</code> is deprecated because it returns a naive value that only looks like UTC.</li>
     <li><code>astimezone(ZoneInfo("Europe/Madrid"))</code> converts between zones and gets daylight saving time right. The names are the same IANA names that <code>Intl.DateTimeFormat</code> takes.</li>
-    <li>For JSON, use <code>isoformat()</code> and <code>fromisoformat()</code>. Since Python 3.11, <code>fromisoformat</code> accepts the <code>Z</code> that <code>toISOString()</code> produces. Pydantic models (lesson 13) and FastAPI (lesson 33) parse and send datetimes as ISO strings for you.</li>
+    <li>For JSON, use <code>isoformat()</code> and <code>fromisoformat()</code>. Since Python 3.11, <code>fromisoformat</code> accepts the <code>Z</code> that <code>toISOString()</code> produces. Pydantic models (lesson 3.5) and FastAPI (lesson 10.1) parse and send datetimes as ISO strings for you.</li>
     <li>Months start at 1: <code>date(2026, 3, 29)</code> is 29 March, where <code>new Date(2026, 3, 29)</code> would be 29 April. <code>weekday()</code> returns 0 for Monday, unlike <code>getDay()</code>, where 0 is Sunday.</li>
     <li>Formatting uses <code>%</code> codes: <code>d.strftime("%Y-%m-%d")</code> to format and <code>datetime.strptime(text, "%d/%m/%Y")</code> to parse, instead of date-fns tokens like <code>yyyy-MM-dd</code>.</li>
     <li>Arithmetic on two datetimes in the same zone is wall-clock arithmetic: one day after noon on 28 March in Madrid is noon on 29 March, although only 23 hours passed. For elapsed time, convert to UTC first.</li>
@@ -3542,7 +3542,7 @@ def from_js_millis(millis: int) -&gt; datetime:
   </ol>
 </template>
 
-<template class="lesson" data-n="33" data-section="7" data-title="Web APIs with FastAPI" data-summary="Express-style routes where type hints do the parsing, validation and docs.">
+<template class="lesson" data-n="33" data-section="10" data-title="Web APIs with FastAPI" data-summary="Express-style routes where type hints do the parsing, validation and docs.">
   <p class="lead">FastAPI will feel like Express with typed DTOs built in. Your type hints decide how path parameters are converted, how request bodies are validated, and what the generated docs show.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript (Express)</div><pre><code class="language-typescript">app.get("/items/:id", (req, res) =&gt; {
@@ -3575,7 +3575,7 @@ def create_item(item: Item) -&gt; Item:
   <h2>What’s different</h2>
   <ul class="points">
     <li><code>item_id: int</code> converts the path parameter for you, and a request to <code>/items/abc</code> gets an automatic 422 error.</li>
-    <li>A parameter typed as a Pydantic model is read from the JSON body and validated (lesson 13).</li>
+    <li>A parameter typed as a Pydantic model is read from the JSON body and validated (lesson 3.5).</li>
     <li>Interactive OpenAPI docs are generated at <code>/docs</code>, with no extra work.</li>
     <li>Dependencies (<code>Depends</code>) inject things like the current user or a database session per route, a cleaner version of Express middleware.</li>
     <li>Raise <code>HTTPException(status_code=404)</code> instead of calling <code>res.status(404)</code>.</li>
@@ -3655,7 +3655,7 @@ def test_delete_unknown():
   </ol>
 </template>
 
-<template class="lesson" data-n="34" data-section="7" data-title="Databases" data-summary="sqlite3 for SQL basics and transactions, then SQLAlchemy as your Prisma.">
+<template class="lesson" data-n="34" data-section="10" data-title="Databases" data-summary="sqlite3 for SQL basics and transactions, then SQLAlchemy as your Prisma.">
   <p class="lead">Python ships with SQLite built in, which makes it perfect for learning SQL and transactions. For bigger apps, SQLAlchemy plays the role Prisma or TypeORM play in TypeScript.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript (Prisma)</div><pre><code class="language-typescript">const user = await prisma.user.create({
@@ -3779,7 +3779,7 @@ with Session(engine) as session:
 </template>
 
 <!-- ================= SECTION 8 ================= -->
-<template class="lesson" data-n="35" data-section="8" data-title="Choosing a web framework" data-summary="FastAPI, Django and Flask next to Express and NestJS, and how to pick one.">
+<template class="lesson" data-n="35" data-section="10" data-title="Choosing a web framework" data-summary="FastAPI, Django and Flask next to Express and NestJS, and how to pick one.">
   <p class="lead">Python has three big web frameworks, and each one matches something you know from Node. FastAPI is the typed, API-first one, Django brings everything from the ORM to an admin site, and Flask is as small as Express.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript (Express)</div><pre><code class="language-typescript">import express from "express";
@@ -3818,7 +3818,7 @@ urlpatterns = [path("items/&lt;int:item_id&gt;", get_item)]</code></pre></div>
     <li><strong>Django</strong> includes an ORM, migrations, logins, forms, templates and an admin site where non-developers can edit data. For JSON APIs you add Django REST Framework, or Django Ninja, which feels like FastAPI.</li>
     <li><strong>Flask</strong> gives you routing and leaves the rest to extensions, like Express. Many existing services use it, and FastAPI borrowed its decorator style.</li>
     <li>In FastAPI, a function parameter that isn’t in the path is a query parameter: <code>limit: int = 10</code> replaces <code>Number(req.query.limit ?? 10)</code>, with validation included.</li>
-    <li>None of them has <code>app.listen()</code>. A separate server process runs your app: uvicorn for FastAPI, gunicorn for Django and Flask. Lesson 37 shows how.</li>
+    <li>None of them has <code>app.listen()</code>. A separate server process runs your app: uvicorn for FastAPI, gunicorn for Django and Flask. Lesson 11.1 shows how.</li>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
@@ -3841,7 +3841,7 @@ urlpatterns = [path("items/&lt;int:item_id&gt;", get_item)]</code></pre></div>
   <p>When the choice isn’t obvious, prototype the hardest requirement first. A hello-world route won’t tell you how much of authentication, migrations or validation you’ll need to maintain yourself.</p>
   <h2>Practice</h2>
   <ol class="tasks">
-    <li class="task" data-task="35-1"><p class="task-text">Pick FastAPI, Django or Flask for three projects, and say why: a JSON API for a React app, an internal tool with logins and admin screens, and two new endpoints in an existing Flask service.</p>
+    <li class="task" data-task="35-1" data-manual><p class="task-text">Pick FastAPI, Django or Flask for three projects, and say why: a JSON API for a React app, an internal tool with logins and admin screens, and two new endpoints in an existing Flask service.</p>
       <details><summary>Solution</summary><p>FastAPI for the React API (typed models and generated docs), Django for the internal tool (its admin site gives you the editing screens almost for free), and Flask for the existing service: add the endpoints where the code already lives.</p></details>
       <label class="done"><input type="checkbox"> Done</label></li>
     <li class="task" data-task="35-2"><p class="task-text">Translate an Express search handler to FastAPI: <code>GET /items/search?q=lamp&amp;limit=2&amp;max_price=50</code>, with <code>q</code> required, <code>limit</code> between 1 and 50, and <code>max_price</code> optional.</p>
@@ -3859,14 +3859,14 @@ def search_items(
         matches = [item for item in matches if item.price &lt;= max_price]
     return matches[:limit]</code></pre></details>
       <label class="done"><input type="checkbox"> Done</label></li>
-    <li class="task" data-task="35-3"><p class="task-text">Run your search API with <code>uv run fastapi dev</code>, open <code>/openapi.json</code>, and find the <code>Item</code> schema, the limits on <code>limit</code> and the 422 response FastAPI documented for you.</p>
+    <li class="task" data-task="35-3" data-manual><p class="task-text">Run your search API with <code>uv run fastapi dev</code>, open <code>/openapi.json</code>, and find the <code>Item</code> schema, the limits on <code>limit</code> and the 422 response FastAPI documented for you.</p>
       <details><summary>Solution</summary><p>The <code>Item</code> schema is under <code>components.schemas</code>. The <code>limit</code> parameter has <code>"minimum": 1</code>, <code>"maximum": 50</code> and <code>"default": 10</code>, and the 422 response is listed under <code>responses</code>. All of it comes from your type hints, so it can’t drift out of date.</p></details>
       <label class="done"><input type="checkbox"> Done</label></li>
   </ol>
 </template>
 
-<template class="lesson" data-n="36" data-section="8" data-title="A real FastAPI service" data-summary="Routers, dependency injection with Depends, API keys and error handlers: NestJS structure in FastAPI.">
-  <p class="lead">Lesson 33 put every route in one file. A real service splits routes into routers, injects what each route needs, and turns domain errors into HTTP responses in one place. If you know NestJS, you know the ideas. FastAPI just uses plain functions for them.</p>
+<template class="lesson" data-n="36" data-section="10" data-title="A real FastAPI service" data-summary="Routers, dependency injection with Depends, API keys and error handlers: NestJS structure in FastAPI.">
+  <p class="lead">Lesson 10.1 put every route in one file. A real service splits routes into routers, injects what each route needs, and turns domain errors into HTTP responses in one place. If you know NestJS, you know the ideas. FastAPI just uses plain functions for them.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript (NestJS)</div><pre><code class="language-typescript">@Injectable()
 export class ApiKeyGuard implements CanActivate {
@@ -4000,7 +4000,7 @@ async def note_not_found_handler(request: Request, exc: NoteNotFound) -&gt; JSON
   </ol>
 </template>
 
-<template class="lesson" data-n="37" data-section="8" data-title="Shipping a web service" data-summary="Settings from the environment, logging, uvicorn in Docker, and a typed TypeScript client from OpenAPI.">
+<template class="lesson" data-n="37" data-section="11" data-title="Shipping a web service" data-summary="Settings from the environment, logging, uvicorn in Docker, and a typed TypeScript client from OpenAPI.">
   <p class="lead">Getting a service into production looks almost the same as in Node: read the configuration from the environment, log every request, add a health check and put it in a container. The one new step is that you don’t start the server yourself. A server process like uvicorn runs your app.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript (Node)</div><pre><code class="language-typescript">// config.ts: parse process.env once, fail fast
@@ -4112,7 +4112,7 @@ async def log_requests(request: Request, call_next) -&gt; Response:
 def health() -&gt; dict[str, str]:
     return {"status": "ok", "version": VERSION}</code></pre></details>
       <label class="done"><input type="checkbox"> Done</label></li>
-    <li class="task" data-task="37-3"><p class="task-text">Put the notes service in a Docker image, run it, and generate a typed TypeScript client from its <code>/openapi.json</code>.</p>
+    <li class="task" data-task="37-3" data-manual><p class="task-text">Put the notes service in a Docker image, run it, and generate a typed TypeScript client from its <code>/openapi.json</code>.</p>
       <details><summary>Solution</summary><pre><code class="language-bash"># Dockerfile
 FROM python:3.15-slim
 COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /bin/
@@ -4128,7 +4128,7 @@ npx openapi-typescript http://localhost:8000/openapi.json -o src/api.d.ts</code>
   </ol>
 </template>
 
-<template class="lesson" data-n="38" data-section="8" data-title="Command-line tools with Typer" data-summary="Type hints become arguments, options and --help, with none of the parsing code.">
+<template class="lesson" data-n="38" data-section="11" data-title="Command-line tools with Typer" data-summary="Type hints become arguments, options and --help, with none of the parsing code.">
   <p class="lead">Python is a great language for the small tools every team needs: scripts, migrations, admin commands. Typer reads a function’s signature and builds the command line from it, so the type hints you already write become arguments, options and help text.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript (Node’s util.parseArgs)</div><pre><code class="language-typescript">import { parseArgs } from "node:util";
@@ -4243,7 +4243,7 @@ def count_rows(
   </ol>
 </template>
 
-<template class="lesson" data-n="39" data-section="8" data-title="Data work with pandas" data-summary="DataFrames, column arithmetic and groupby: the part of Python with no real TypeScript equivalent.">
+<template class="lesson" data-n="39" data-section="12" data-title="Data work with pandas" data-summary="DataFrames, column arithmetic and groupby: the part of Python with no real TypeScript equivalent.">
   <p class="lead">Sooner or later someone hands you a CSV export and asks for numbers. In TypeScript that means arrays of objects and a chain of <code>reduce</code> calls. In Python it means pandas: you work with whole columns at once, and grouping and totals take one line each.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">const orders = parse(csvText, {
@@ -4330,7 +4330,7 @@ print(summary.to_dict("records"))
   </ol>
 </template>
 
-<template class="lesson" data-n="40" data-section="8" data-title="Where to go next" data-summary="An npm-to-Python phrasebook, habits to unlearn, and how to keep learning.">
+<template class="lesson" data-n="40" data-section="13" data-title="Where to go next" data-summary="An npm-to-Python phrasebook, habits to unlearn, and how to keep learning.">
   <p class="lead">You can now read and write Python, test it, and ship a web service. This last lesson is a map: which Python package replaces each npm package you reach for, which habits to watch for, and what to read next.</p>
   <div class="compare">
     <div class="pane ts"><div class="pane-head">TypeScript (package.json)</div><pre><code class="language-typescript">{
@@ -4383,40 +4383,40 @@ dev = [
     <table class="truth">
       <thead><tr><th>npm</th><th>Python</th></tr></thead>
       <tbody>
-        <tr><td>express, nestjs</td><td><code>fastapi</code>, <code>django</code>, <code>flask</code> (lesson 35)</td></tr>
-        <tr><td>zod</td><td><code>pydantic</code> (lesson 13)</td></tr>
-        <tr><td>prisma, typeorm</td><td><code>sqlalchemy</code> + <code>alembic</code> for migrations (lesson 34)</td></tr>
+        <tr><td>express, nestjs</td><td><code>fastapi</code>, <code>django</code>, <code>flask</code> (lesson 10.4)</td></tr>
+        <tr><td>zod</td><td><code>pydantic</code> (lesson 3.5)</td></tr>
+        <tr><td>prisma, typeorm</td><td><code>sqlalchemy</code> + <code>alembic</code> for migrations (lesson 10.2)</td></tr>
         <tr><td>axios, fetch</td><td><code>httpx</code></td></tr>
-        <tr><td>jest, vitest</td><td><code>pytest</code> (lesson 22)</td></tr>
-        <tr><td>eslint, prettier</td><td><code>ruff</code> (lesson 21)</td></tr>
-        <tr><td>tsc</td><td><code>mypy</code>, <code>pyright</code> (lesson 21)</td></tr>
+        <tr><td>jest, vitest</td><td><code>pytest</code> (lesson 6.1)</td></tr>
+        <tr><td>eslint, prettier</td><td><code>ruff</code> (lesson 5.3)</td></tr>
+        <tr><td>tsc</td><td><code>mypy</code>, <code>pyright</code> (lesson 5.3)</td></tr>
         <tr><td>nodemon</td><td><code>fastapi dev</code>, <code>uvicorn --reload</code></td></tr>
-        <tr><td>dotenv</td><td><code>pydantic-settings</code> (lesson 37)</td></tr>
+        <tr><td>dotenv</td><td><code>pydantic-settings</code> (lesson 11.1)</td></tr>
         <tr><td>pino, winston</td><td><code>logging</code>, <code>structlog</code></td></tr>
-        <tr><td>commander, yargs</td><td><code>typer</code>, <code>argparse</code> (lesson 38)</td></tr>
+        <tr><td>commander, yargs</td><td><code>typer</code>, <code>argparse</code> (lesson 11.4)</td></tr>
         <tr><td>lodash</td><td><code>itertools</code>, <code>collections</code>, <code>functools</code></td></tr>
         <tr><td>date-fns, dayjs</td><td><code>datetime</code>, <code>zoneinfo</code></td></tr>
         <tr><td>bullmq</td><td><code>celery</code>, <code>rq</code>, <code>arq</code></td></tr>
         <tr><td>playwright</td><td><code>playwright</code> (the same tool, with a Python API)</td></tr>
-        <tr><td>npx, nvm</td><td><code>uvx</code>, <code>uv python</code> (lesson 20)</td></tr>
+        <tr><td>npx, nvm</td><td><code>uvx</code>, <code>uv python</code> (lesson 5.2)</td></tr>
       </tbody>
     </table></div>
     <figcaption>A phrasebook for your first real projects. Where a lesson covers the tool, it’s listed.</figcaption>
   </figure>
-  <aside class="trap"><strong>TS trap</strong><p>The most common habit to unlearn is writing TypeScript in Python syntax: index loops, getters and setters, a class around a single function, <code>== None</code>. The code works, but it reads like a translation. Ruff catches some of it. Re-read lessons 5 to 8 and 25 to 28 after your first real project: they make more sense the second time.</p></aside>
+  <aside class="trap"><strong>TS trap</strong><p>The most common habit to unlearn is writing TypeScript in Python syntax: index loops, getters and setters, a class around a single function, <code>== None</code>. The code works, but it reads like a translation. Ruff catches some of it. Re-read lessons 2.1 to 2.4 and 7.1 to 7.4 after your first real project: they make more sense the second time.</p></aside>
   <h2>Put the pieces together in one project</h2>
   <p>Pick a task you already do manually. For example, build a <a href="#lesson-38">Typer command</a> that reads a CSV, validates each row, and writes a summary. Start with functions that take data and return data. Keep file I/O and command-line parsing at the edges, then <a href="#lesson-22">test</a> a valid row, a rejected row, and an empty file without running the whole CLI each time.</p>
   <p>Once that works, add an API only if another program needs the same functionality. Keep the existing parsing and summarizing functions and let <a href="#lesson-33">FastAPI</a> handle HTTP. This gives you practice deciding what belongs in plain Python and what belongs in the framework.</p>
   <h2>Practice</h2>
   <ol class="tasks">
-    <li class="task" data-task="40-1"><p class="task-text">Build one small service end to end: a notes API with SQLAlchemy, settings from the environment, an API key, tests that swap the database, clean ruff and mypy runs, and a Dockerfile.</p>
+    <li class="task" data-task="40-1" data-manual><p class="task-text">Build one small service end to end: a notes API with SQLAlchemy, settings from the environment, an API key, tests that swap the database, clean ruff and mypy runs, and a Dockerfile.</p>
       <details><summary>Solution</summary><p>The reference answer in <code>solutions/40-where-to-go-next/ex40_1_capstone.md</code> walks through one layout: <code>settings.py</code>, <code>db.py</code> with a <code>yield</code> session dependency, a router, and tests that override the session with an in-memory SQLite database.</p></details>
       <label class="done"><input type="checkbox"> Done</label></li>
-    <li class="task" data-task="40-2"><p class="task-text">Port something small that your team already has in TypeScript, such as a script or one endpoint. Note which packages you replaced and every place you caught yourself writing TypeScript in Python.</p>
+    <li class="task" data-task="40-2" data-manual><p class="task-text">Port something small that your team already has in TypeScript, such as a script or one endpoint. Note which packages you replaced and every place you caught yourself writing TypeScript in Python.</p>
       <details><summary>Solution</summary><p>There’s no single answer. Data shaping, file handling and scripts usually get shorter. Code that leans on advanced TypeScript types usually gets simpler types. Check your port for index loops, <code>== None</code>, mutable defaults and one-method classes, then run ruff and mypy on it.</p></details>
       <label class="done"><input type="checkbox"> Done</label></li>
-    <li class="task" data-task="40-3"><p class="task-text">Open the installed libraries (<code>.venv/lib/python3.15/site-packages/</code> on macOS and Linux, <code>.venv\Lib\site-packages\</code> on Windows), pick a library the course used, and find three things from the course in its source.</p>
-      <details><summary>Solution</summary><p>For example, <code>fastapi/routing.py</code> shows that <code>router.get(...)</code> returns a decorator (lesson 27), <code>typer/main.py</code> builds commands by inspecting function signatures, and SQLAlchemy’s <code>Session</code> defines <code>__enter__</code> and <code>__exit__</code> (lesson 28), which is why <code>with Session(engine) as session:</code> works.</p></details>
+    <li class="task" data-task="40-3" data-manual><p class="task-text">Open the installed libraries (<code>.venv/lib/python3.15/site-packages/</code> on macOS and Linux, <code>.venv\Lib\site-packages\</code> on Windows), pick a library the course used, and find three things from the course in its source.</p>
+      <details><summary>Solution</summary><p>For example, <code>fastapi/routing.py</code> shows that <code>router.get(...)</code> returns a decorator (lesson 7.3), <code>typer/main.py</code> builds commands by inspecting function signatures, and SQLAlchemy’s <code>Session</code> defines <code>__enter__</code> and <code>__exit__</code> (lesson 7.4), which is why <code>with Session(engine) as session:</code> works.</p></details>
       <label class="done"><input type="checkbox"> Done</label></li>
   </ol>
 </template>
@@ -4428,15 +4428,27 @@ dev = [
 <script>
 (function () {
   var SECTIONS = {
-    1: { name: "Python fundamentals", blurb: "Syntax, types, functions and control flow, mapped from what you know." },
-    2: { name: "How Python handles data", blurb: "Names, mutability, truthiness and scope: where TS instincts mislead." },
-    3: { name: "Your own types", blurb: "Classes, dataclasses, enums, optional values, Protocols and Pydantic." },
-    4: { name: "Collections and errors", blurb: "Lists, strings, dicts, sets and exceptions." },
-    5: { name: "Modules, packages and tooling", blurb: "Imports, uv, ruff, type checking and pytest." },
-    6: { name: "Pythonic Python", blurb: "Comprehensions, generators, decorators and context managers." },
-    7: { name: "Beyond the basics", blurb: "Async, data files, web APIs and databases." },
-    8: { name: "Python in the real world", blurb: "Frameworks, production services, command-line tools, data work and what to learn next." }
+    1: { name: "Python fundamentals", blurb: "Syntax, types, functions and control flow.", ids: ["01", "02", "03", "04"] },
+    2: { name: "How Python handles data", blurb: "Names, mutability, truthiness and scope.", ids: ["05", "06", "07", "08"] },
+    3: { name: "Classes and types", blurb: "Classes, validation, the data model and typing.", ids: ["09", "10", "11", "12", "13", "14", "datamodel", "generics"] },
+    4: { name: "Collections and errors", blurb: "Lists, strings, dictionaries, sets and exceptions.", ids: ["15", "16", "17", "smallfeatures", "18"] },
+    5: { name: "Modules and tooling", blurb: "Imports, uv, linting and type checking.", ids: ["19", "20", "21"] },
+    6: { name: "Testing and debugging", blurb: "Tests, mocks, coverage, debugging and profiling.", ids: ["22", "23", "coverage", "24", "profiling"] },
+    7: { name: "Pythonic Python", blurb: "Comprehensions, generators, decorators and context managers.", ids: ["25", "26", "27", "28"] },
+    8: { name: "Concurrency", blurb: "Async, threads, processes and the GIL.", ids: ["29", "asyncprod", "30"] },
+    9: { name: "Files and data formats", blurb: "Files, structured data and dates.", ids: ["31", "xml", "32"] },
+    10: { name: "Web APIs and databases", blurb: "FastAPI, databases and web frameworks.", ids: ["33", "34", "postgres", "35", "36"] },
+    11: { name: "Shipping and packaging", blurb: "Services, CI, packages and command-line tools.", ids: ["37", "ci", "packaging", "38"] },
+    12: { name: "Data and AI", blurb: "DataFrames, arrays and LLM APIs.", ids: ["39", "arrays", "llm"] },
+    13: { name: "Going further", blurb: "Projects, larger codebases and recent Python releases.", ids: ["40", "architecture", "modern"] }
   };
+  var positions = {};
+  Object.keys(SECTIONS).forEach(function (section) {
+    SECTIONS[section].ids.forEach(function (id, index) {
+      positions[id] = { section: +section, index: index, number: section + "." + (index + 1) };
+    });
+  });
+  var legacyModules = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 7, 7: 8, 8: 10 };
   var KEY = "pyts-progress";
   var storageNote = document.getElementById("storageNote");
   function showStorageNote(message) {
@@ -4472,8 +4484,11 @@ dev = [
     }).filter(function (topic) {
       return topic !== "What’s different" && topic !== "See it" && topic !== "Practice";
     }).join(" ");
-    return { n: t.dataset.n, section: +t.dataset.section, title: t.dataset.title, summary: t.dataset.summary, topics: topics, tpl: t };
+    var position = positions[t.dataset.n];
+    if (!position || position.section !== +t.dataset.section) throw new Error("Invalid curriculum entry: " + t.dataset.n);
+    return { n: t.dataset.n, section: position.section, number: position.number, title: t.dataset.title, summary: t.dataset.summary, topics: topics, tpl: t };
   });
+  lessons.sort(function (a, b) { return a.section - b.section || positions[a.n].index - positions[b.n].index; });
   var modules = Object.keys(SECTIONS).map(function (id) {
     return { id: id, name: SECTIONS[id].name, blurb: SECTIONS[id].blurb, lessons: lessons.filter(function (l) { return l.section === +id; }) };
   });
@@ -4582,7 +4597,7 @@ dev = [
 
   function lessonLink(l) {
     var a = el("a", { href: "#lesson-" + l.n });
-    a.appendChild(el("span", { class: "num" }, l.n));
+    a.appendChild(el("span", { class: "num" }, l.number));
     a.appendChild(el("span", null, l.title));
     var check = el("span", { class: "check", role: "img", "aria-label": "Completed" }, "✓");
     check.hidden = !state.lessons[l.n];
@@ -4623,7 +4638,9 @@ dev = [
       module.lessons.forEach(function (l) {
         var description = (l.title + " " + l.summary + " " + l.topics + " " + module.name).toLowerCase();
         var matches = terms.every(function (term) {
-          return /^\d+$/.test(term) ? Number(term) === Number(l.n) : description.includes(term);
+          return /^\d+(?:\.\d+)?$/.test(term)
+            ? term === l.number || (/^\d+$/.test(term) && Number(term) === Number(l.n))
+            : description.includes(term);
         });
         l.outlineLink.parentElement.hidden = !matches;
         if (matches) { any = true; count++; }
@@ -4652,21 +4669,24 @@ dev = [
     var d = doneCount(), next = resumeLesson();
     var start = document.getElementById("startBtn");
     if (next && (d || state.lastLesson)) {
-      start.textContent = "Resume lesson " + Number(next.n);
+      start.textContent = "Resume lesson " + next.number;
       start.href = "#lesson-" + next.n;
     } else if (!next) {
-      start.textContent = "Review lesson 1";
+      start.textContent = "Review lesson 1.1";
     }
     var homeProg = document.getElementById("homeProg");
+    var tasks = lessons.flatMap(function (l) { return Array.from(l.tpl.content.querySelectorAll(".task")); });
+    var manual = tasks.filter(function (task) { return task.hasAttribute("data-manual"); }).length;
+    homeProg.textContent = modules.length + " topics · " + lessons.length + " lessons · " + tasks.length + " exercises · " + (tasks.length - manual) + " test-checked · " + manual + " self-checked";
     if (d || state.lastLesson) {
-      homeProg.textContent = d + " of " + lessons.length + " lessons complete" + (next ? " · Next: " + next.title : "");
+      homeProg.textContent += " · " + d + " lessons complete" + (next ? " · Next: " + next.title : "");
     }
     var map = document.getElementById("courseMap");
     modules.forEach(function (module) {
-      var box = el("section", { id: "module-" + module.id });
+      var box = el("section", { id: "topic-" + module.id });
       var completed = module.lessons.filter(function (l) { return state.lessons[l.n]; }).length;
       var count = completed ? completed + "/" + module.lessons.length + " complete" : module.lessons.length + " lessons";
-      box.appendChild(el("p", { class: "module-meta" }, "Module " + module.id + " · " + count));
+      box.appendChild(el("p", { class: "module-meta" }, "Topic " + module.id + " · " + count));
       box.appendChild(el("h3", null, module.name));
       box.appendChild(el("p", null, module.blurb));
       var ol = el("ol");
@@ -4688,9 +4708,9 @@ dev = [
     var breadcrumb = el("nav", { class: "breadcrumb", "aria-label": "Breadcrumb" });
     breadcrumb.appendChild(el("a", { href: "#curriculum" }, "Curriculum"));
     breadcrumb.appendChild(el("span", { "aria-hidden": "true" }, "/"));
-    breadcrumb.appendChild(el("a", { href: "#module-" + l.section }, SECTIONS[l.section].name));
+    breadcrumb.appendChild(el("a", { href: "#topic-" + l.section }, SECTIONS[l.section].name));
     head.appendChild(breadcrumb);
-    head.appendChild(el("p", { class: "kicker" }, "Module " + l.section + " · Lesson " + l.n + " of " + lessons.length));
+    head.appendChild(el("p", { class: "kicker" }, "Topic " + l.section + " · Lesson " + l.number));
     head.appendChild(el("h1", null, l.title));
     view.appendChild(head);
     var body = el("article");
@@ -4759,8 +4779,8 @@ dev = [
 
   function route(event) {
     var hash = location.hash;
-    var m = /^#lesson-(\d\d)(-practice)?$/.exec(hash);
-    var l = m ? lessons.find(function (x) { return x.n === m[1]; }) : undefined;
+    var m = /^#lesson-([a-z0-9]+(?:\.\d+)?)(-practice)?$/.exec(hash);
+    var l = m ? lessons.find(function (x) { return x.n === m[1] || x.number === m[1]; }) : undefined;
     var page = l ? l.n : "home";
     if (renderedPage !== page) {
       resetSearch();
@@ -4777,7 +4797,10 @@ dev = [
       view.querySelectorAll(scrollPanels).forEach(function (panel) { scrollObserver.observe(panel); });
     }
     setDrawer(false);
-    var section = ((l && m[2]) || (!l && /^#(?:curriculum|module-[1-8])$/.test(hash))) ? document.getElementById(hash.slice(1)) : null;
+    var legacyModule = /^#module-([1-8])$/.exec(hash);
+    var sectionId = legacyModule ? "topic-" + legacyModules[legacyModule[1]] : hash.slice(1);
+    var section = l && m[2] ? document.getElementById("lesson-" + l.n + "-practice")
+      : !l && /^#(?:curriculum|topic-\d+|module-[1-8])$/.test(hash) ? document.getElementById(sectionId) : null;
     if (section) section.scrollIntoView();
     else window.scrollTo(0, 0);
     if (!mobile.matches) revealCurrentLesson();

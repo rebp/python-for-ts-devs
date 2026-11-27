@@ -23,7 +23,7 @@ PowerShell or the VS Code terminal.
   Python 3.15 the first time you run the course.
 - **A browser** for the lessons, and **an editor** for the exercises. VS Code
   works well (see [Tips](#tips)).
-- Only for exercise 37-3: Docker and Node.js.
+- Only for exercise 11.1-3: Docker and Node.js.
 
 Install uv with one command:
 
@@ -60,7 +60,7 @@ Then open a new terminal so the `uv` command is found. Homebrew
 3. Open the [course website](https://rebp.github.io/python-for-ts-devs/) or
    double-click `index.html` to read locally. Start from the curriculum or
    use **Find a lesson** to search by lesson number, title, or topic heading
-   (try `keyword-only` or `enum members`). On smaller screens,
+   (try `8.1`, `keyword-only` or `enum members`). On smaller screens,
    tap the menu icon to open **Lessons** and find the search box. Use the
    sun or moon icon to switch themes. You can swipe sideways inside wide
    diagrams and code examples.
@@ -85,7 +85,7 @@ For each lesson:
 3. **Compare with the solution** in `solutions/` once your tests pass, or
    when you're stuck.
 
-The lessons build on each other, so go in order the first time. Lesson 20
+The lessons build on each other, so go in order the first time. Lesson 5.2
 explains uv properly; until then, `uv sync` and `uv run` are all you need.
 Use **Jump to practice** in a lesson to go straight to its exercises. The
 website remembers the last lesson you opened and your checkmarks in that
@@ -117,7 +117,7 @@ uv run course.py --done
 | Command | What it does |
 | --- | --- |
 | `uv run course.py` | Show the next exercise and run its tests |
-| `uv run course.py 03-2` | Check one specific exercise (any order) |
+| `uv run course.py 1.3-2` | Check one specific exercise (any order) |
 | `uv run course.py --done` | Mark the current README exercise as done |
 | `uv run course.py --list` | List all exercises: ✓ done, ▶ next, · to do |
 | `uv run course.py --progress` | Progress bars, overall and per section |
@@ -126,7 +126,11 @@ uv run course.py --done
 Your exercise progress lives in `progress.json` in this folder. It's in
 `.gitignore`, so it stays on your machine. The "Done" checkboxes in the web
 page are separate: the browser remembers them, and they don't sync with
-`course.py`.
+`course.py`. Exercise numbers combine the topic, lesson and task: `1.3-2` is
+the second exercise in lesson 1.3. Earlier exercise IDs such as `03-2` and
+old lesson links still work, and existing progress is retained. Existing
+exercise filenames and some comments keep their original IDs so updating the
+course does not rename files you may have edited.
 
 ## Keeping your copy up to date
 
@@ -162,20 +166,20 @@ conftest.py, course_helpers.py   test plumbing you can ignore
 
 A few lessons are shaped differently:
 
-- **14 Typing in depth** also runs `mypy --strict` on your code, so your
+- **3.6 Typing in depth** also runs `mypy --strict` on your code, so your
   type hints are checked, not just the behaviour.
-- **19 Modules and imports** is a real package: you edit `shop/pricing.py`,
+- **5.1 Modules and imports** is a real package: you edit `shop/pricing.py`,
   `shop/__init__.py` and `main.py`.
-- **20 and 21** (uv, ruff, mypy) are hands-on tooling tasks, done in a scratch
+- **5.2 and 5.3** (uv, ruff, mypy) are hands-on tooling tasks, done in a scratch
   project, so they're all README exercises.
-- **22 Testing with pytest**, **23-1**, **23-2** and **33-3** turn it around:
+- **6.1 Testing with pytest**, **6.2-1**, **6.2-2** and **10.1-3** turn it around:
   *you* write the tests. They're checked by running your tests against working
   code (they must pass) and against deliberately broken versions (they must
   fail).
-- **35 to 40, Python in the real world**, go past the language: choosing a web
+- The later topics go past the language: choosing a web
   framework, structuring and shipping a FastAPI service, command-line tools with
-  Typer, and data work with pandas. **37-3** builds a Docker image and a
-  TypeScript client, so it needs Docker and Node.js. **40** ends the course with
+  Typer, and data work with pandas. **11.1-3** builds a Docker image and a
+  TypeScript client, so it needs Docker and Node.js. **13.1** has
   open-ended projects instead of tests.
 
 ## Tips
@@ -200,7 +204,7 @@ A few lessons are shaped differently:
   same path. Try for a while first, then compare. There's often more than one
   good answer: the tests check behaviour, and only occasionally the technique
   the lesson is about (for example, that you used a comprehension or `yield`).
-- **Lint your code** the way lesson 21 teaches: `uv run ruff check exercises`.
+- **Lint your code** the way lesson 5.3 teaches: `uv run ruff check exercises`.
 
 ## Troubleshooting
 
@@ -213,7 +217,7 @@ A few lessons are shaped differently:
   you ran plain `python` or `pytest`, which can't see the project's
   libraries. Put `uv run` in front: `uv run python …`, `uv run pytest …`.
 - **An exercise you've solved shows as not done**: run
-  `uv run course.py <id>`, for example `uv run course.py 03-2`. It marks the
+  `uv run course.py <id>`, for example `uv run course.py 1.3-2`. It marks the
   exercise done as soon as its tests pass.
 
 ## For course maintainers

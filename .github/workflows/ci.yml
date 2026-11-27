@@ -31,5 +31,8 @@ jobs:
       - name: All tests against the reference solutions
         run: uv run pytest --solutions -q
 
+      - name: Course runner tests
+        run: uv run pytest tests -q
+
       - name: Lint
         run: uv run ruff check .
