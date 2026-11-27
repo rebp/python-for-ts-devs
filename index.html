@@ -3620,7 +3620,7 @@ with Timer("sleep"):
 
 fetchAll(["https://example.com"]).then(console.log);</code></pre></div>
     <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">import asyncio
-import httpx
+import httpx2 as httpx
 
 async def fetch_all(urls: list[str]) -&gt; list[int]:
     async with httpx.AsyncClient() as client:
@@ -3635,7 +3635,7 @@ print(asyncio.run(fetch_all(["https://example.com"])))</code></pre></div>
   <ul class="points">
     <li><code>asyncio.run(main())</code> starts the event loop and runs your top-level coroutine. Node does this for you; Python doesn’t.</li>
     <li><code>asyncio.gather</code> is <code>Promise.all</code>, <code>asyncio.create_task</code> starts work in the background, and <code>asyncio.sleep</code> replaces <code>setTimeout</code> plus a promise.</li>
-    <li>You need async libraries (httpx, asyncpg, aiofiles). A normal blocking call inside async code freezes everything.</li>
+    <li>You need async libraries (httpx2, asyncpg, aiofiles). A normal blocking call inside async code freezes everything.</li>
     <li>Async helps when you wait on the network or disk. For heavy computation, use processes instead (<code>concurrent.futures.ProcessPoolExecutor</code>).</li>
   </ul>
   <h2>See it</h2>
@@ -5432,6 +5432,151 @@ def totals_by_category(frame: pl.LazyFrame) -&gt; pl.LazyFrame:
     <li class="task" data-task="arrays-3" data-manual><p class="task-text">Choose NumPy, pandas or Polars for numerical arrays, an existing pandas analysis and a large file query. When does a lazy query run?</p>
       <details><summary>Hint</summary><p>Think about arrays, ecosystem compatibility and query planning.</p></details>
       <details><summary>Solution</summary><p>NumPy fits array math; pandas fits an existing pandas workflow; Polars is worth considering for lazy columnar queries. <code>collect()</code> executes the plan.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
+<template class="lesson" data-n="llm" data-section="12" data-title="Calling LLM APIs" data-summary="Use an official SDK with structured responses, streaming, timeouts and mocked tests.">
+  <p class="lead">Calling an LLM from Python resembles calling one from TypeScript: use the provider’s SDK and handle network failures. Structured output and streaming still need explicit handling for refusals and incomplete responses.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">import OpenAI from "openai";
+
+async function summarize(client: OpenAI, text: string) {
+  const response = await client.responses.create({
+    model: "gpt-5.5", input: text,
+  });
+  if (response.status !== "completed" || !response.output_text) {
+    throw new Error("No completed text response");
+  }
+  return response.output_text;
+}</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">from openai import OpenAI
+
+def summarize(client: OpenAI, text: str) -&gt; str:
+    response = client.responses.create(model="gpt-5.5", input=text)
+    if response.status != "completed" or not response.output_text:
+        raise ValueError("No completed text response")
+    return response.output_text</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li>The official SDK provides <code>OpenAI</code> and <code>AsyncOpenAI</code>. Create a client with a timeout and bounded retries, and close it when finished. Models and availability can change; choose one supported by your account.</li>
+    <li><code>responses.parse(..., text_format=MyModel)</code> uses a Pydantic model for structured output. Check <code>status</code> and <code>output_parsed</code>; a refusal or incomplete response may not contain a parsed result.</li>
+    <li>With <code>stream=True</code>, process events such as <code>response.output_text.delta</code> and wait for completion. Close the stream even if a consumer stops early.</li>
+    <li>A timeout does not prove the provider did no work. Retrying can repeat side effects or charges; retry transient failures deliberately and make side effects idempotent.</li>
+    <li>Use an environment variable or trusted identity for credentials, never source code. Tests in this course use HTTPX2’s <code>MockTransport</code>; they do not call an API.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth">
+      <thead><tr><th>Request</th><th>Response</th><th>Application action</th></tr></thead>
+      <tbody>
+        <tr><td>Schema + input</td><td>Completed structured output</td><td>Validate business rules</td></tr>
+        <tr><td>Streamed input</td><td>Text deltas, then completion</td><td>Show progress and confirm completion</td></tr>
+        <tr><td>Any request</td><td>Refusal, timeout or failure</td><td>Report or handle the error</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>A schema constrains shape, not factual accuracy. Treat model output as untrusted data.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p>A parsed object is not proof that the answer is true, and <code>output_parsed</code> can be <code>None</code>. Handle refusals and incomplete responses rather than silently returning an empty result.</p></aside>
+  <h2>Test a structured response offline</h2>
+  <p>This runnable example uses the real SDK with a fake HTTP transport. The address and key are test-only, and the transport returns a local response without contacting a server. Real calls require an authorized account and may cost money.</p>
+  <pre><code class="language-python">import httpx2
+from openai import OpenAI
+from pydantic import BaseModel
+
+class Summary(BaseModel):
+    topic: str
+    keywords: list[str]
+
+def fake_response(request: httpx2.Request) -&gt; httpx2.Response:
+    return httpx2.Response(200, json={
+        "id": "test", "object": "response", "created_at": 0,
+        "status": "completed", "model": "gpt-5.5",
+        "output": [{
+            "id": "message", "type": "message", "role": "assistant",
+            "status": "completed", "content": [{
+                "type": "output_text", "annotations": [],
+                "text": '{"topic":"Python","keywords":["async"]}',
+            }],
+        }],
+    })
+
+with OpenAI(
+    api_key="test-only", base_url="https://invalid.local/v1",
+    http_client=httpx2.Client(transport=httpx2.MockTransport(fake_response)),
+    timeout=10.0, max_retries=0,
+) as client:
+    response = client.responses.parse(model="gpt-5.5", input="Example", text_format=Summary)
+    if response.status != "completed" or response.output_parsed is None:
+        raise ValueError("No completed structured response")
+    print(response.output_parsed.topic)  # Python</code></pre>
+  <p>For async streaming, use <code>AsyncOpenAI</code> and <code>async for</code>. This function is not called here; supply a real client only when you intend to make a request. Partial text may already have been displayed when a later error arrives.</p>
+  <pre><code class="language-python">from openai import AsyncOpenAI
+
+async def show_stream(client: AsyncOpenAI, prompt: str) -&gt; None:
+    stream = await client.responses.create(model="gpt-5.5", input=prompt, stream=True)
+    completed = False
+    has_text = False
+    async with stream:
+        async for event in stream:
+            if event.type == "response.output_text.delta":
+                has_text = has_text or bool(event.delta)
+                print(event.delta, end="", flush=True)
+            elif event.type in ("response.refusal.delta", "response.refusal.done",
+                               "response.failed", "response.incomplete"):
+                raise RuntimeError("The response was refused or failed")
+            elif event.type == "response.completed":
+                completed = event.response.status == "completed"
+    if not completed or not has_text:
+        raise RuntimeError("The stream ended without completed text")
+
+async def main(prompt: str) -&gt; None:
+    async with AsyncOpenAI(timeout=15.0, max_retries=2) as client:
+        await show_stream(client, prompt)</code></pre>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="llm-1"><p class="task-text">Request a Pydantic <code>Summary</code> with the supplied client. Reject incomplete or missing parsed output; let SDK errors propagate.</p>
+      <details><summary>Hint</summary><p>Use <code>responses.parse</code> with <code>text_format=Summary</code>.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from openai import OpenAI
+from pydantic import BaseModel
+
+class Summary(BaseModel):
+    topic: str
+    keywords: list[str]
+
+def summarize(client: OpenAI, text: str) -&gt; Summary:
+    response = client.responses.parse(model="gpt-5.5", input=text, text_format=Summary)
+    if response.status != "completed" or response.output_parsed is None:
+        raise ValueError("response was incomplete or contained no parsed result")
+    return response.output_parsed</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="llm-2"><p class="task-text">Collect async text deltas and return them only after a completed response. Reject refusals, failed or truncated streams, and empty output.</p>
+      <details><summary>Hint</summary><p>Use <code>async with stream</code>, track completion, and join the text parts.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from openai import AsyncOpenAI
+
+async def collect_text(client: AsyncOpenAI, prompt: str) -&gt; str:
+    stream = await client.responses.create(model="gpt-5.5", input=prompt, stream=True)
+    parts: list[str] = []
+    completed = False
+    async with stream:
+        async for event in stream:
+            if event.type == "response.output_text.delta":
+                parts.append(event.delta)
+            elif event.type in ("response.refusal.delta", "response.refusal.done"):
+                raise RuntimeError("model refused the request")
+            elif event.type in ("response.failed", "response.incomplete"):
+                raise RuntimeError("response failed or was incomplete")
+            elif event.type == "response.completed":
+                completed = event.response.status == "completed"
+    text = "".join(parts)
+    if not completed or not text:
+        raise RuntimeError("stream ended without a completed text response")
+    return text</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="llm-3" data-manual><p class="task-text">Explain the risks of retrying a timed-out request and how to test it without an API call.</p>
+      <details><summary>Hint</summary><p>The provider may already have processed the first request.</p></details>
+      <details><summary>Solution</summary><p>Retries may repeat work or incur cost. Use bounded retries and idempotent side effects, avoid logging private prompts, and simulate timeouts with a mock transport.</p></details>
       <label class="done"><input type="checkbox"> Done</label></li>
   </ol>
 </template>
