@@ -2275,6 +2275,96 @@ print(a | b)  # all of them</code></pre></details>
   </ol>
 </template>
 
+<template class="lesson" data-n="smallfeatures" data-section="4" data-title="Small features TS devs trip on" data-summary="Walrus expressions, record types, unpacking, comparison chains, loop else and one-item tuples.">
+  <p class="lead">Some small Python features have no exact TypeScript spelling. They are useful in real code, but a familiar-looking comma or <code>else</code> can mean something surprising.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">const values = [1, 2, 3, 4];
+const first = values[0];
+const middle = values.slice(1, -1);
+const last = values[values.length - 1];
+console.log(first, middle, last);  // 1 [2, 3] 4</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">values = [1, 2, 3, 4]
+first, *middle, last = values
+print(first, middle, last)  # 1 [2, 3] 4</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li><code>name := expression</code> assigns and returns a value inside an expression. Use it when it avoids repeating a meaningful calculation, not to pack several steps onto one line.</li>
+    <li><code>NamedTuple</code> is an immutable tuple with named fields, a dataclass is a class with generated methods, and <code>TypedDict</code> describes a plain dictionary to a type checker. None validates untrusted input by itself.</li>
+    <li>Star-unpacking can collect the middle as well as the end: <code>first, *middle, last = values</code>. There must be enough values for the unstarred targets.</li>
+    <li><code>0 &lt;= n &lt; 10</code> is a chained comparison; the middle expression is evaluated once. A loop’s <code>else</code> runs when the loop finishes without <code>break</code>, including an empty loop.</li>
+    <li><code>(1)</code> is an integer; <code>(1,)</code> is a one-element tuple. The comma makes the tuple, not the parentheses.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth">
+      <thead><tr><th>Expression</th><th>Result or meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>(1)</code> / <code>(1,)</code></td><td><code>int</code> / one-item <code>tuple</code></td></tr>
+        <tr><td><code>a, *mid, z = [1, 2, 3, 4]</code></td><td><code>1</code>, <code>[2, 3]</code>, <code>4</code></td></tr>
+        <tr><td><code>for ... else</code></td><td>The <code>else</code> runs only if no <code>break</code> occurred</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>Read the punctuation and control flow, not just the familiar words.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p>A trailing comma changes the value: <code>result = compute(),</code> stores a tuple containing the result, not the result itself. Parentheses are optional for a tuple in many contexts.</p></aside>
+  <h2>Keep a search result without repeating work</h2>
+  <p>Here the walrus keeps the stripped value for the condition and later use. The loop’s <code>else</code> handles the no-match case; it is skipped when <code>break</code> finds a name. The chained comparison reads like a mathematical range.</p>
+  <pre><code class="language-python">names = ["  ", " Ada ", "Lin"]
+for raw in names:
+    if (name := raw.strip()) and 1 &lt;= len(name) &lt;= 10:
+        break
+else:
+    name = "(missing)"
+print(name)  # Ada</code></pre>
+  <p>Pick a record type by behavior, not by appearance. A <code>NamedTuple</code> supports tuple unpacking and cannot reassign fields; a normal dataclass can be mutated; a <code>TypedDict</code> is still an ordinary dict at runtime. Use Pydantic when incoming data must be checked.</p>
+  <pre><code class="language-python">from dataclasses import dataclass
+from typing import NamedTuple, TypedDict
+
+class Point(NamedTuple):
+    x: int
+    y: int
+
+@dataclass
+class Counter:
+    value: int
+
+class User(TypedDict):
+    name: str
+
+point = Point(2, 3)
+counter = Counter(1)
+counter.value += 1
+user: User = {"name": "Ada"}
+print(point.x, counter.value, user["name"])  # 2 2 Ada</code></pre>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="smallfeatures-1"><p class="task-text">Strip an iterable of lines once each and return the nonempty results, using an assignment expression.</p>
+      <details><summary>Hint</summary><p>A comprehension can bind the stripped value in its <code>if</code> clause.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from collections.abc import Iterable
+
+def clean_lines(lines: Iterable[str]) -&gt; list[str]:
+    return [cleaned for line in lines if (cleaned := line.strip())]</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="smallfeatures-2"><p class="task-text">Find the first matching index in an iterable, or return <code>None</code>, using <code>for...else</code>.</p>
+      <details><summary>Hint</summary><p>Break on a match; the <code>else</code> handles exhaustion.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from collections.abc import Iterable
+
+def find_index(values: Iterable[str], target: str) -&gt; int | None:
+    for index, value in enumerate(values):
+        if value == target:
+            break
+    else:
+        return None
+    return index</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="smallfeatures-3" data-manual><p class="task-text">Predict the types of <code>(1)</code> and <code>(1,)</code>, unpack a first, middle and last value, and choose a record type for an immutable point, a mutable record and a JSON-shaped dict.</p>
+      <details><summary>Hint</summary><p>The comma makes the tuple; <code>*middle</code> collects a list.</p></details>
+      <details><summary>Solution</summary><p>The first is an integer and the second a tuple. Use <code>first, *middle, last = values</code>; choose <code>NamedTuple</code>, a dataclass and <code>TypedDict</code>, respectively.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
 <template class="lesson" data-n="18" data-section="4" data-title="Exceptions" data-summary="try/except/else/finally, custom errors and when to ask forgiveness instead of permission.">
   <p class="lead">Exceptions work like <code>throw</code> and <code>catch</code>, but you catch by type instead of checking <code>instanceof</code>, and Python code uses them more freely than TS code does.</p>
   <div class="compare">
