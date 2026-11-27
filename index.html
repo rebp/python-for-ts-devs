@@ -365,7 +365,7 @@ pre{margin:0;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.6;
       <a class="btn btn-primary" id="startBtn" href="#lesson-01">Start lesson 1.1</a>
       <a class="jump-link" href="#curriculum">Browse the curriculum</a>
     </div>
-    <p class="hero-note" id="homeProg">13 topics · 40 lessons · 120 exercises</p>
+    <p class="hero-note" id="homeProg">13 topics · 54 lessons · 162 exercises · 131 test-checked · 31 self-checked</p>
     <figure class="hero-preview">
       <figcaption>Same task: keep the adults</figcaption>
       <div class="compare">
@@ -5776,6 +5776,92 @@ name = "Dependencies point toward the domain"
 type = "layers"
 layers = ["shop.api", "shop.application", "shop.domain"]</code></pre>
       <p>Declare the member in <code>dependencies</code> and map it with <code>workspace = true</code> under <code>tool.uv.sources</code>.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
+<template class="lesson" data-n="modern" data-section="13" data-title="What’s new in Python 3.13–3.15" data-summary="Free-threaded CPython, t-strings, deferred annotations and recent interpreter changes.">
+  <p class="lead">Python evolves each year, just as JavaScript and TypeScript do. This course uses Python 3.15, so these features are available unless a build-specific note says otherwise.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">function parts(strings: TemplateStringsArray, ...values: unknown[]) {
+  return { strings: [...strings], values };
+}
+const name = "Ada";
+const message = parts`Hello, ${name}!`;
+console.log(message.strings, message.values);</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">name = "Ada"
+message = t"Hello, {name}!"
+print(message.strings, message.values)
+# ('Hello, ', '!') ('Ada',)</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li>Python 3.13 introduced a more capable interactive REPL and continued improving error messages. Try the REPL rather than treating every experiment as a file.</li>
+    <li>A free-threaded CPython build can run Python threads in parallel. The normal build still uses the GIL, and some extensions can re-enable it in a free-threaded build. Shared state still needs synchronization.</li>
+    <li>Python 3.14’s <code>t"..."</code> produces a <code>Template</code> with literal strings and interpolation objects, not a finished string. A renderer decides how to process the values.</li>
+    <li>Since 3.14, annotations are deferred by default. <code>annotationlib</code> can inspect unresolved forward references; <code>from __future__ import annotations</code> still uses stringified annotations.</li>
+    <li>Python 3.15 adds explicit <code>lazy import</code>, <code>frozendict</code> and a sampling profiler, and uses UTF-8 by default. Earlier versions cannot run 3.15-only syntax.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth">
+      <thead><tr><th>Version</th><th>Examples of changes</th></tr></thead>
+      <tbody>
+        <tr><td>3.13</td><td>New REPL, improved errors, optional free-threaded build</td></tr>
+        <tr><td>3.14</td><td>t-strings, deferred annotations, supported free-threaded mode</td></tr>
+        <tr><td>3.15</td><td>Lazy imports, <code>frozendict</code>, UTF-8 default, profiling tools</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>The course’s 3.15 minimum lets you use these examples without version guards.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p>A t-string does not automatically escape HTML or produce a <code>str</code>. Like a tagged template, it hands pieces to a processor; that processor must apply the right escaping for the output context.</p></aside>
+  <h2>Render a template without trusting interpolated text</h2>
+  <p>For a trusted template containing HTML text, escape interpolated values after applying their conversion and format specification. This small renderer is not a general HTML sanitizer: URLs, JavaScript, CSS and untrusted template literals need their own policies.</p>
+  <pre><code class="language-python">from html import escape
+from string.templatelib import Template, convert
+
+def render_html(template: Template) -&gt; str:
+    parts: list[str] = []
+    for part in template:
+        if isinstance(part, str):
+            parts.append(part)
+        else:
+            value = convert(part.value, part.conversion)
+            parts.append(escape(format(value, part.format_spec), quote=True))
+    return "".join(parts)
+
+name = "&lt;Ada&gt;"
+print(render_html(t"&lt;p&gt;{name}&lt;/p&gt;"))  # &lt;p&gt;&amp;lt;Ada&amp;gt;&lt;/p&gt;</code></pre>
+  <p>Deferred annotations can refer to a name that is not defined yet. Requesting the value later may still fail; <code>FORWARDREF</code> preserves unresolved names for inspection. Annotation introspection can execute code, so it is not a sandbox for untrusted annotations.</p>
+  <pre><code class="language-python">import annotationlib
+
+def process(value: MissingType) -&gt; None:
+    pass
+
+annotations = annotationlib.get_annotations(
+    process, format=annotationlib.Format.FORWARDREF,
+)
+print(type(annotations["value"]).__name__)  # ForwardRef</code></pre>
+  <p>To inspect CPython’s current GIL state use <code>sys._is_gil_enabled()</code>; the build flag is <code>sysconfig.get_config_var("Py_GIL_DISABLED")</code>. Check extension compatibility before assuming a free-threaded process stays GIL-free.</p>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="modern-1"><p class="task-text">Render a trusted t-string as HTML text, escaping each formatted interpolation while keeping literal text.</p>
+      <details><summary>Hint</summary><p>Iterate over the template, apply <code>convert</code> and <code>format</code>, then escape each value.</p></details>
+      <details><summary>Solution</summary><p>Use the <code>render_html</code> implementation above. It is intentionally limited to trusted HTML-text templates.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="modern-2"><p class="task-text">Return the names of parameters with top-level unresolved annotations, without requiring those types to exist.</p>
+      <details><summary>Hint</summary><p>Use <code>annotationlib.Format.FORWARDREF</code> and check for <code>ForwardRef</code>.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">import annotationlib
+from collections.abc import Callable
+
+def unresolved_annotations(function: Callable[..., object]) -&gt; list[str]:
+    annotations = annotationlib.get_annotations(function, format=annotationlib.Format.FORWARDREF)
+    return [name for name, value in annotations.items()
+            if name != "return" and isinstance(value, annotationlib.ForwardRef)]</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="modern-3" data-manual><p class="task-text">Explain the normal and free-threaded builds, check the current GIL state, and say why shared mutable data still needs locks.</p>
+      <details><summary>Hint</summary><p>The running GIL state can differ from the build’s capabilities.</p></details>
+      <details><summary>Solution</summary><p>The free-threaded build can run threads in parallel, but extensions may re-enable the GIL. Use <code>sys._is_gil_enabled()</code> and synchronize multi-step updates to shared state.</p></details>
       <label class="done"><input type="checkbox"> Done</label></li>
   </ol>
 </template>
