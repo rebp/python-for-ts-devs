@@ -2925,6 +2925,104 @@ def test_twenty_degrees_is_warm(monkeypatch):
   </ol>
 </template>
 
+<template class="lesson" data-n="coverage" data-section="6" data-title="Coverage and property-based tests" data-summary="Measure branches with pytest-cov and find unexpected inputs with Hypothesis.">
+  <p class="lead">Coverage tells you which code your tests executed, not whether their assertions are good. Hypothesis explores generated inputs and shrinks failures, much like <code>fast-check</code> in TypeScript.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">import fc from "fast-check";
+
+const clamp = (n: number) =&gt; Math.min(Math.max(n, 0), 10);
+fc.assert(fc.property(fc.integer(), n =&gt; {
+  const result = clamp(n);
+  return 0 &lt;= result &amp;&amp; result &lt;= 10;
+}));</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">from hypothesis import given, settings
+from hypothesis import strategies as st
+
+def clamp(n: int) -&gt; int:
+    return min(max(n, 0), 10)
+
+@settings(derandomize=True, database=None, deadline=None)
+@given(st.integers())
+def test_bounds(n: int) -&gt; None:
+    assert 0 &lt;= clamp(n) &lt;= 10
+
+test_bounds()  # pytest can run it too</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li>Install <code>pytest-cov</code> and run pytest with <code>--cov</code>. Add <code>--cov-branch</code> to measure which paths through conditions ran, not just which lines executed.</li>
+    <li><code>--cov-report=term-missing</code> points to missing lines and branches. A number is a guide to investigation, not a guarantee of correct behavior.</li>
+    <li><code>@given</code> supplies values from strategies such as <code>st.integers()</code>, <code>st.text()</code> and <code>st.lists()</code>. Describe a property that must hold for all valid inputs.</li>
+    <li>When a property fails, Hypothesis searches for a smaller counterexample. Build inputs that satisfy your preconditions rather than discarding most generated values.</li>
+    <li>Keep tests deterministic and isolated from real services. The course examples disable the example database and deadlines so exercises do not depend on network, saved state or machine speed.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth">
+      <thead><tr><th>Test</th><th>Input</th><th>What it reveals</th></tr></thead>
+      <tbody>
+        <tr><td>Example</td><td><code>5</code>, <code>-1</code></td><td>Middle and lower-bound behavior</td></tr>
+        <tr><td>Missing branch</td><td><code>11</code></td><td>The value above the upper bound</td></tr>
+        <tr><td>Property</td><td>Many generated values</td><td>A small input that breaks the range invariant</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>With bounds 0 and 10, returning 11 for an input above 10 violates the property even when the first two examples pass.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p>A coverage percentage can be green while the tested branch returns the wrong value. Treat coverage as a map of what you did not exercise, then write assertions about the behavior that matters.</p></aside>
+  <h2>Turn a requirement into an invariant</h2>
+  <p>For a clamp, every result must stay between its bounds; a value already in range must not change. Generate the lower bound and a nonnegative width so every pair of bounds is valid. The property is about the contract, not one hand-picked example.</p>
+  <pre><code class="language-python">from hypothesis import given, settings
+from hypothesis import strategies as st
+
+def clamp(value: int, lower: int, upper: int) -&gt; int:
+    return min(max(value, lower), upper)
+
+@settings(derandomize=True, database=None, deadline=None)
+@given(value=st.integers(), lower=st.integers(), width=st.integers(0, 100))
+def test_clamp(value: int, lower: int, width: int) -&gt; None:
+    upper = lower + width
+    result = clamp(value, lower, upper)
+    assert lower &lt;= result &lt;= upper
+    if lower &lt;= value &lt;= upper:
+        assert result == value
+
+test_clamp()</code></pre>
+  <p>In your own project add the tools with <code>uv add --dev hypothesis pytest-cov</code>. Run <code>uv run pytest --cov=your_package --cov-branch --cov-report=term-missing</code>; then inspect the missing paths instead of chasing a percentage alone.</p>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="coverage-1"><p class="task-text">The example tests for <code>clamp</code> pass, but its property test fails. Read the shrunk counterexample and fix the bug.</p>
+      <details><summary>Hint</summary><p>What should be returned when the value is above the upper bound?</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">def clamp(value: int, lower: int, upper: int) -&gt; int:
+    if lower &gt; upper:
+        raise ValueError("lower must not exceed upper")
+    if value &lt; lower:
+        return lower
+    if value &gt; upper:
+        return upper
+    return value</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="coverage-2"><p class="task-text">Write a Hypothesis property showing that whitespace normalization preserves a list of words in order. The runner checks it against both working and broken code.</p>
+      <details><summary>Hint</summary><p>Join generated words with mixed whitespace, then compare the result to the same words joined by one space.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from hypothesis import given, settings
+from hypothesis import strategies as st
+
+def normalize(text: str) -&gt; str:
+    return " ".join(text.split())
+
+@settings(derandomize=True, database=None, deadline=None)
+@given(st.lists(st.text(alphabet="abc", min_size=1, max_size=5), max_size=5))
+def test_words(words: list[str]) -&gt; None:
+    assert normalize(" \t".join(words)) == " ".join(words)
+
+test_words()</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="coverage-3" data-manual><p class="task-text">Run only the two example cases with branch coverage. Explain a missing path and add a case that takes it.</p>
+      <details><summary>Hint</summary><p>Select <code>examples_that_miss_the_bug</code> with <code>-k</code> and add <code>--cov-branch --cov-report=term-missing</code>.</p></details>
+      <details><summary>Solution</summary><p>The above-upper-bound branch is missing. Test <code>clamp(11, 0, 10) == 10</code>, then rerun the full tests.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
 <template class="lesson" data-n="24" data-section="6" data-title="Debugging" data-summary="Tracebacks read bottom-up, breakpoint() instead of debugger, and the VS Code debugger.">
   <p class="lead">Debugging Python feels familiar: there’s a statement that pauses the program, a debugger in VS Code, and stack traces when things go wrong. The one real surprise is the stack trace. Python prints it upside down compared with JavaScript, so you need to read it from the bottom.</p>
   <div class="compare">

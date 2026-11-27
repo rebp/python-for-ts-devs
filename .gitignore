@@ -8,6 +8,10 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
 
 # Files the exercises create when you run them
 *.db
