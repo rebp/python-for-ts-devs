@@ -1957,7 +1957,7 @@ print(first([box.value, 4]))  # 3</code></pre></div>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
-    <table class="truth">
+    <table class="truth wide">
       <thead><tr><th>Need</th><th>TypeScript</th><th>Python</th></tr></thead>
       <tbody>
         <tr><td>Keep a value’s type</td><td><code>f&lt;T&gt;(x: T): T</code></td><td><code>def f[T](x: T) -&gt; T</code></td></tr>
@@ -1966,7 +1966,7 @@ print(first([box.value, 4]))  # 3</code></pre></div>
         <tr><td>Custom narrowing</td><td><code>x is string</code></td><td><code>TypeIs[str]</code></td></tr>
       </tbody>
     </table></div>
-    <figcaption>A type checker follows these relationships; the runtime executes the function bodies.</figcaption>
+    <figcaption>A type checker follows these relationships; the runtime executes the function bodies. On a small screen, swipe sideways to see the whole table.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p><code>Box[int]("wrong")</code> still constructs a box at runtime even though a checker rejects it. A generic annotation is not a validator; use an actual check or Pydantic at an untrusted boundary.</p></aside>
   <h2>Preserve a callable’s signature</h2>
@@ -2959,7 +2959,7 @@ test_bounds()  # pytest can run it too</code></pre></div>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
-    <table class="truth">
+    <table class="truth wide">
       <thead><tr><th>Test</th><th>Input</th><th>What it reveals</th></tr></thead>
       <tbody>
         <tr><td>Example</td><td><code>5</code>, <code>-1</code></td><td>Middle and lower-bound behavior</td></tr>
@@ -2967,7 +2967,7 @@ test_bounds()  # pytest can run it too</code></pre></div>
         <tr><td>Property</td><td>Many generated values</td><td>A small input that breaks the range invariant</td></tr>
       </tbody>
     </table></div>
-    <figcaption>With bounds 0 and 10, returning 11 for an input above 10 violates the property even when the first two examples pass.</figcaption>
+    <figcaption>With bounds 0 and 10, returning 11 for an input above 10 violates the property even when the first two examples pass. On a small screen, swipe sideways to see the whole table.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>A coverage percentage can be green while the tested branch returns the wrong value. Treat coverage as a map of what you did not exercise, then write assertions about the behavior that matters.</p></aside>
   <h2>Turn a requirement into an invariant</h2>
@@ -3135,7 +3135,7 @@ print(result)  # Ada Lovelace</code></pre></div>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
-    <table class="truth">
+    <table class="truth wide">
       <thead><tr><th>Question</th><th>Tool</th><th>Output</th></tr></thead>
       <tbody>
         <tr><td>Which functions cost time?</td><td><code>cProfile</code> + snakeviz</td><td>Call counts and timings</td></tr>
@@ -3143,7 +3143,7 @@ print(result)  # Ada Lovelace</code></pre></div>
         <tr><td>Which small operation is faster?</td><td><code>timeit</code></td><td>Repeated timings</td></tr>
       </tbody>
     </table></div>
-    <figcaption>Profile the real workload first; microbenchmarks help compare a specific change afterwards.</figcaption>
+    <figcaption>Profile the real workload first; microbenchmarks help compare a specific change afterwards. On a small screen, swipe sideways to see the whole table.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>A list used like a JavaScript queue with repeated <code>pop(0)</code> pays for shifting its remaining elements. <code>deque.popleft()</code> is designed for efficient removal from the front.</p></aside>
   <h2>Measure before changing a loop</h2>
@@ -4531,7 +4531,7 @@ print(statement, params)
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
-    <table class="truth">
+    <table class="truth wide">
       <thead><tr><th>Request</th><th>Success</th><th>Failure</th></tr></thead>
       <tbody>
         <tr><td>Open a session and transaction</td><td>Run the route</td><td>Raise an exception</td></tr>
@@ -4539,7 +4539,7 @@ print(statement, params)
         <tr><td>Exit the session</td><td>Return connection to pool</td><td>Return or discard the connection</td></tr>
       </tbody>
     </table></div>
-    <figcaption>One request owns its session; the engine owns the pool shared by requests.</figcaption>
+    <figcaption>One request owns its session; the engine owns the pool shared by requests. On a small screen, swipe sideways to see the whole table.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>A route returning a value does not mean its transaction has committed. If cleanup commits after a response is sent, a failed commit can look successful. Choose a transaction boundary that finishes before sending the response.</p></aside>
   <h2>Commit the request before responding</h2>
@@ -4986,7 +4986,7 @@ print(supported)  # ['3.10', '3.15']</code></pre></div>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
-    <table class="truth">
+    <table class="truth wide">
       <thead><tr><th>Where</th><th>What happens</th><th>Why</th></tr></thead>
       <tbody>
         <tr><td>Before commit</td><td>Ruff and mypy hooks</td><td>Fast feedback</td></tr>
@@ -4994,7 +4994,7 @@ print(supported)  # ['3.10', '3.15']</code></pre></div>
         <tr><td>Test job</td><td>Pytest</td><td>Check behavior, not just syntax</td></tr>
       </tbody>
     </table></div>
-    <figcaption>Local hooks help; CI remains authoritative because every contributor runs the same job.</figcaption>
+    <figcaption>Local hooks help; CI remains authoritative because every contributor runs the same job. On a small screen, swipe sideways to see the whole table.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>Python versions are not decimal numbers: <code>3.10</code> is newer than <code>3.9</code>, even though YAML may parse unquoted <code>3.10</code> as <code>3.1</code>. Quote them and compare numeric components.</p></aside>
   <h2>Run the same checks locally and in CI</h2>
@@ -5085,7 +5085,7 @@ print(greet("Ada"))  # Hello, Ada!</code></pre></div>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
-    <table class="truth">
+    <table class="truth wide">
       <thead><tr><th>Step</th><th>Python</th><th>npm analogy</th></tr></thead>
       <tbody>
         <tr><td>Metadata</td><td><code>pyproject.toml</code></td><td><code>package.json</code></td></tr>
@@ -5094,7 +5094,7 @@ print(greet("Ada"))  # Hello, Ada!</code></pre></div>
         <tr><td>Upload</td><td><code>uv publish</code></td><td><code>npm publish</code></td></tr>
       </tbody>
     </table></div>
-    <figcaption>Build and inspect the artifacts before uploading; publishing is not part of the automated exercises.</figcaption>
+    <figcaption>Build and inspect the artifacts before uploading; publishing is not part of the automated exercises. On a small screen, swipe sideways to see the whole table.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>The name installed from an index can differ from the import name. A distribution named <code>hello-tool</code> can contain <code>hello_tool</code>; the entry point uses the Python import path, not the distribution name.</p></aside>
   <h2>Build before publishing</h2>
@@ -5468,7 +5468,7 @@ def summarize(client: OpenAI, text: str) -&gt; str:
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
-    <table class="truth">
+    <table class="truth wide">
       <thead><tr><th>Request</th><th>Response</th><th>Application action</th></tr></thead>
       <tbody>
         <tr><td>Schema + input</td><td>Completed structured output</td><td>Validate business rules</td></tr>
@@ -5476,7 +5476,7 @@ def summarize(client: OpenAI, text: str) -&gt; str:
         <tr><td>Any request</td><td>Refusal, timeout or failure</td><td>Report or handle the error</td></tr>
       </tbody>
     </table></div>
-    <figcaption>A schema constrains shape, not factual accuracy. Treat model output as untrusted data.</figcaption>
+    <figcaption>A schema constrains shape, not factual accuracy. Treat model output as untrusted data. On a small screen, swipe sideways to see the whole table.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>A parsed object is not proof that the answer is true, and <code>output_parsed</code> can be <code>None</code>. Handle refusals and incomplete responses rather than silently returning an empty result.</p></aside>
   <h2>Test a structured response offline</h2>
@@ -5704,7 +5704,7 @@ print(checkout([10, 20], saved.append), saved)  # 30 [30]</code></pre></div>
   </ul>
   <h2>See it</h2>
   <figure class="figure"><div class="figure-scroll">
-    <table class="truth">
+    <table class="truth wide">
       <thead><tr><th>Layer</th><th>May depend on</th><th>Example</th></tr></thead>
       <tbody>
         <tr><td>API</td><td>Application, domain</td><td>HTTP routes</td></tr>
@@ -5712,7 +5712,7 @@ print(checkout([10, 20], saved.append), saved)  # 30 [30]</code></pre></div>
         <tr><td>Domain</td><td>Neither outer layer</td><td>Rules and shared types</td></tr>
       </tbody>
     </table></div>
-    <figcaption>Dependencies point inward. An adapter can implement a domain protocol without making the domain import the adapter.</figcaption>
+    <figcaption>Dependencies point inward. An adapter can implement a domain protocol without making the domain import the adapter. On a small screen, swipe sideways to see the whole table.</figcaption>
   </figure>
   <aside class="trap"><strong>TS trap</strong><p>An import is executable work in Python. If <code>pricing</code> imports <code>inventory</code> while <code>inventory</code> imports a name from <code>pricing</code>, that name may not exist yet. Put the shared model in a third module both can import.</p></aside>
   <h2>Keep imports pointing toward the domain</h2>
