@@ -200,6 +200,7 @@ pre{margin:0;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.6;
 
 /* truth table */
 .truth{width:100%;border-collapse:collapse;font-size:15px;background:var(--surface)}
+.truth.wide{min-width:480px}
 .truth th,.truth td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left}
 .truth th{font-weight:600}
 .truth td:first-child{font-family:var(--mono);font-size:14px}
@@ -5350,6 +5351,87 @@ print(summary.to_dict("records"))
     orders = pd.read_csv(csv_path).assign(revenue=lambda df: df["price"] * df["qty"])
     totals = orders.groupby("region")["revenue"].sum().sort_values(ascending=False)
     return totals.to_dict()</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
+<template class="lesson" data-n="arrays" data-section="12" data-title="NumPy and Polars" data-summary="Vectorized array operations and lazy, columnar queries alongside pandas.">
+  <p class="lead">TypeScript often loops over arrays to transform data. NumPy applies operations to whole numerical arrays, while Polars can plan a columnar query before executing it.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">const values = [-1, 1, 3];
+const result = values.map(n =&gt; n * 2).filter(n =&gt; n &gt; 0);
+console.log(result);  // [2, 6]</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">import numpy as np
+
+values = np.array([-1, 1, 3])
+doubled = values * 2
+result = doubled[doubled &gt; 0]
+print(result.tolist())  # [2, 6]</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li>NumPy stores typed arrays and applies vectorized operations to their elements. Broadcasting can combine compatible shapes; incompatible shapes raise an error.</li>
+    <li>Vectorization often moves loops into optimized native code, but it can allocate intermediate arrays. Measure with representative data instead of assuming every vectorized expression is faster.</li>
+    <li>Polars has eager <code>DataFrame</code> operations and a lazy <code>LazyFrame</code>. A lazy query is a plan until <code>collect()</code> executes it, allowing optimizations such as pushing filters toward the source.</li>
+    <li>Pandas is a strong choice for existing pandas workflows and its broad ecosystem. NumPy suits numerical arrays; consider Polars for columnar queries and lazy processing of larger files.</li>
+    <li>Be explicit about missing values, dtypes and ordering. Group output order is not guaranteed unless you request or apply one.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth wide">
+      <thead><tr><th>Need</th><th>Useful tool</th><th>Model</th></tr></thead>
+      <tbody>
+        <tr><td>Numeric matrix math</td><td>NumPy</td><td>Typed arrays and broadcasting</td></tr>
+        <tr><td>Existing dataframe ecosystem</td><td>pandas</td><td>Eager dataframe operations</td></tr>
+        <tr><td>Plan a columnar query</td><td>Polars</td><td>Lazy expressions, then <code>collect()</code></td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>Choose for the data, existing ecosystem and measured workload, not a single speed claim. On a small screen, swipe sideways to see the whole table.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p>A Python list multiplied by two repeats the list: <code>[1, 2] * 2</code> is <code>[1, 2, 1, 2]</code>. A NumPy array multiplied by two performs element-wise arithmetic.</p></aside>
+  <h2>Build a lazy Polars query</h2>
+  <p>Start from a dataframe or use <code>pl.scan_csv</code> for a file. Build expressions without running them, then collect once. This example filters before grouping and sorts explicitly so the displayed order is predictable.</p>
+  <pre><code class="language-python">import polars as pl
+
+data = pl.DataFrame({
+    "category": ["b", "a", "a", "b"],
+    "amount": [5, 1, 2, -2],
+})
+query = (
+    data.lazy()
+    .filter(pl.col("amount") &gt; 0)
+    .group_by("category")
+    .agg(pl.col("amount").sum().alias("total"))
+    .sort("category")
+)
+print(query.collect().to_dicts())
+# [{'category': 'a', 'total': 3}, {'category': 'b', 'total': 5}]</code></pre>
+  <p>For a file, <code>scan_csv</code> lets the optimizer plan the read as part of the query. Use <code>query.explain()</code> to inspect that plan. A filter also discards rows where its predicate is null, so decide explicitly how missing amounts should be handled. Not every operation can stream or avoid materializing data; measure the workload you actually have.</p>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="arrays-1"><p class="task-text">Scale a NumPy array, replace negative results with zero, and leave the input unchanged. Do not write a Python loop.</p>
+      <details><summary>Hint</summary><p>Combine array multiplication with <code>np.maximum</code>.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">import numpy as np
+from numpy.typing import NDArray
+
+def scale_nonnegative(values: NDArray[np.float64], factor: float) -&gt; NDArray[np.float64]:
+    return np.maximum(values * factor, 0.0)</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="arrays-2"><p class="task-text">Build a lazy Polars query that sums positive amounts by category and sorts the result. Do not collect inside the function.</p>
+      <details><summary>Hint</summary><p>Filter, <code>group_by</code>, aggregate and sort the <code>LazyFrame</code>.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">import polars as pl
+
+def totals_by_category(frame: pl.LazyFrame) -&gt; pl.LazyFrame:
+    return (
+        frame.filter(pl.col("amount") &gt; 0)
+        .group_by("category")
+        .agg(pl.col("amount").sum().alias("total"))
+        .sort("category")
+    )</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="arrays-3" data-manual><p class="task-text">Choose NumPy, pandas or Polars for numerical arrays, an existing pandas analysis and a large file query. When does a lazy query run?</p>
+      <details><summary>Hint</summary><p>Think about arrays, ecosystem compatibility and query planning.</p></details>
+      <details><summary>Solution</summary><p>NumPy fits array math; pandas fits an existing pandas workflow; Polars is worth considering for lazy columnar queries. <code>collect()</code> executes the plan.</p></details>
       <label class="done"><input type="checkbox"> Done</label></li>
   </ol>
 </template>
