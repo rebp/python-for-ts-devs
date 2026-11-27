@@ -4957,6 +4957,111 @@ npx openapi-typescript http://localhost:8000/openapi.json -o src/api.d.ts</code>
   </ol>
 </template>
 
+<template class="lesson" data-n="ci" data-section="11" data-title="CI and pre-commit" data-summary="Run a Python version matrix with setup-uv, cache dependencies and enforce local checks.">
+  <p class="lead">A Python CI pipeline plays the same role as a TypeScript pipeline: install locked dependencies, run checks, and test the supported runtimes. Pre-commit gives fast local feedback, but CI is the shared gate.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">const versions = ["3.9", "3.10", "3.15"];
+const supported = versions.filter(version =&gt; {
+  const [major, minor] = version.split(".").map(Number);
+  return major &gt; 3 || (major === 3 &amp;&amp; minor &gt;= 10);
+});
+console.log(supported);  // ["3.10", "3.15"]</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">versions = ["3.9", "3.10", "3.15"]
+
+def version_pair(version: str) -&gt; tuple[int, int]:
+    major, minor = version.split(".")
+    return int(major), int(minor)
+
+supported = [v for v in versions if version_pair(v) &gt;= (3, 10)]
+print(supported)  # ['3.10', '3.15']</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li><code>astral-sh/setup-uv</code> installs uv and can select a Python version. Its cache stores downloaded artifacts; <code>uv.lock</code>, not the cache, is the source of truth.</li>
+    <li>A matrix runs the same job for each declared version or operating system. Quote versions such as <code>"3.15"</code> so YAML does not treat them as numbers.</li>
+    <li><code>uv sync --locked</code> refuses an out-of-date lockfile. Run the same Ruff, mypy and pytest commands locally and in CI.</li>
+    <li>Pre-commit runs hooks on changed files before a commit. Hooks can be bypassed, so run the important checks in CI too.</li>
+    <li>Mypy often needs the whole package and its dependencies. A local hook can use the project environment and <code>pass_filenames: false</code> rather than checking isolated changed files.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth">
+      <thead><tr><th>Where</th><th>What happens</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Before commit</td><td>Ruff and mypy hooks</td><td>Fast feedback</td></tr>
+        <tr><td>GitHub Actions</td><td>Locked install and version matrix</td><td>Repeatable shared check</td></tr>
+        <tr><td>Test job</td><td>Pytest</td><td>Check behavior, not just syntax</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>Local hooks help; CI remains authoritative because every contributor runs the same job.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p>Python versions are not decimal numbers: <code>3.10</code> is newer than <code>3.9</code>, even though YAML may parse unquoted <code>3.10</code> as <code>3.1</code>. Quote them and compare numeric components.</p></aside>
+  <h2>Run the same checks locally and in CI</h2>
+  <p>This workflow is for a normal project with a <code>src/</code> package and passing tests. This course’s own CI checks its deliberately incomplete stubs separately. Add only versions your project actually supports; here the minimum and only tested version is 3.15.</p>
+  <pre><code class="language-yaml">name: checks
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.15"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v9
+        with:
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run mypy src
+      - run: uv run pytest</code></pre>
+  <p>For a separate project supporting both 3.14 and 3.15, list <code>["3.14", "3.15"]</code> instead. Pin action revisions according to your team’s supply-chain policy. For local checks, put this in <code>.pre-commit-config.yaml</code>; <code>uv</code> and the project’s dev dependencies must be available on the machine.</p>
+  <pre><code class="language-yaml">repos:
+  - repo: local
+    hooks:
+      - id: ruff
+        name: Ruff
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+      - id: mypy
+        name: Mypy
+        entry: uv run mypy src
+        language: system
+        types: [python]
+        pass_filenames: false</code></pre>
+  <p>Add <code>pre-commit</code> as a development dependency, run <code>uv run pre-commit install</code>, and try <code>uv run pre-commit run --all-files</code>. Review any automatic changes before committing.</p>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="ci-1"><p class="task-text">Select version strings at or above a minimum, comparing major and minor components numerically and rejecting malformed versions.</p>
+      <details><summary>Hint</summary><p>Split each value into two integer components before comparing tuples.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from collections.abc import Iterable
+
+def select_versions(versions: Iterable[str], minimum: str) -&gt; list[str]:
+    def components(version: str) -&gt; tuple[int, int]:
+        major, separator, minor = version.partition(".")
+        if not separator or not major.isdecimal() or not minor.isdecimal():
+            raise ValueError(f"invalid Python version: {version}")
+        return int(major), int(minor)
+    floor = components(minimum)
+    return [version for version in versions if components(version) &gt;= floor]</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="ci-2"><p class="task-text">Implement a typed mean function that rejects empty input. Its tests also run Ruff and <code>mypy --strict</code> on the file.</p>
+      <details><summary>Hint</summary><p>Check for an empty list before dividing, then return a float.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">def mean(values: list[float]) -&gt; float:
+    if not values:
+        raise ValueError("values must not be empty")
+    return sum(values) / len(values)</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="ci-3" data-manual><p class="task-text">Draft a version matrix and local Ruff/mypy hooks. Why keep the checks in CI?</p>
+      <details><summary>Hint</summary><p>Local hooks can be skipped and may run with a different environment.</p></details>
+      <details><summary>Solution</summary><p>Use the workflow and hooks above, quote versions and install from the lockfile. CI supplies the repeatable check even when a local hook is skipped.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
 <template class="lesson" data-n="38" data-section="11" data-title="Command-line tools with Typer" data-summary="Type hints become arguments, options and --help, with none of the parsing code.">
   <p class="lead">Python is a great language for the small tools every team needs: scripts, migrations, admin commands. Typer reads a function’s signature and builds the command line from it, so the type hints you already write become arguments, options and help text.</p>
   <div class="compare">
