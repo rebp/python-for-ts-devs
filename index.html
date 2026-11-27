@@ -3193,7 +3193,7 @@ async def main() -&gt; None:
 
 
 asyncio.run(main())</code></pre>
-  <p>If the second operation needs the first result, use two awaits instead. For concurrent work that should cancel its siblings on failure, see <code>TaskGroup</code> in <a href="#lesson-30">Lesson 8.3</a>.</p>
+  <p>If the second operation needs the first result, use two awaits instead. For concurrent work that should cancel its siblings on failure, see <code>TaskGroup</code> in <a href="#lesson-asyncprod">Lesson 8.2</a>.</p>
   <h2>Practice</h2>
   <ol class="tasks">
     <li class="task" data-task="29-1"><p class="task-text">Write <code>async def say_after(text, seconds)</code> that sleeps and then prints. Run three of them at once with <code>gather</code> and time the total.</p>
@@ -3225,6 +3225,146 @@ asyncio.run(main())</code></pre></details>
         print("gave up after 1 second")
 
 asyncio.run(main())</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
+<template class="lesson" data-n="asyncprod" data-section="8" data-title="Async in production" data-summary="Task groups, bounded queues, concurrency limits, timeouts and cancellation.">
+  <p class="lead">Both TypeScript and Python can run independent async calls together. Python’s structured concurrency makes the lifetime of those calls explicit, including what happens when one fails.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">async function double(n: number): Promise&lt;number&gt; {
+  return n * 2;
+}
+
+async function main() {
+  const values = [1, 2, 3];
+  const results = await Promise.all(values.map(double));
+  console.log(results);  // [2, 4, 6]
+}
+main();</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">import asyncio
+
+async def double(n: int) -&gt; int:
+    return n * 2
+
+async def main() -&gt; None:
+    async with asyncio.TaskGroup() as group:
+        tasks = [group.create_task(double(n)) for n in [1, 2, 3]]
+    print([task.result() for task in tasks])  # [2, 4, 6]
+
+asyncio.run(main())</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li><code>TaskGroup</code> waits for all its children. If one raises a non-cancellation exception, it cancels siblings and raises an <code>ExceptionGroup</code>. By default <code>gather</code> propagates the first exception without cancelling the other awaitables.</li>
+    <li>A bounded <code>asyncio.Queue</code> applies backpressure: <code>put()</code> waits when the queue is full. Workers call <code>task_done()</code>; <code>join()</code> waits until each queued item is accounted for. Python 3.13 added graceful <code>queue.shutdown()</code>.</li>
+    <li>A <code>Semaphore</code> limits simultaneous operations. It does <em>not</em> limit requests per second; a time-based rate limit needs a separate clock or rate limiter.</li>
+    <li><code>asyncio.timeout()</code> cancels the current task and raises <code>TimeoutError</code> outside its block. Clean up in <code>finally</code>; if you catch <code>CancelledError</code>, normally re-raise it.</li>
+    <li><code>await asyncio.to_thread(blocking_fn, arg)</code> keeps blocking I/O off the event loop. Cancelling the await does not stop a function already running in its thread.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth">
+      <thead><tr><th>Boundary</th><th>What it controls</th></tr></thead>
+      <tbody>
+        <tr><td><code>TaskGroup</code></td><td>Lifetime and failure of related tasks</td></tr>
+        <tr><td><code>Queue(maxsize=2)</code></td><td>Pending work and producer backpressure</td></tr>
+        <tr><td><code>Semaphore(2)</code></td><td>Operations active at the same time</td></tr>
+        <tr><td><code>timeout(1)</code></td><td>How long the current task waits</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>These limits solve different problems. A concurrency limit alone is not a request-per-second limit.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p><code>Promise.all</code> rejects on the first failure but does not stop the other promises. A Python <code>TaskGroup</code> actively cancels sibling tasks and waits for their cleanup before it exits.</p></aside>
+  <h2>Drain a worker pool before exiting</h2>
+  <p>Give each worker items from a bounded queue. After the producer finishes, shut the queue down normally; workers finish the items already queued, then <code>get()</code> raises <code>QueueShutDown</code>. Put <code>task_done()</code> in <code>finally</code> so cancellation or a handler error does not leave a retrieved item unaccounted for.</p>
+  <pre><code class="language-python">import asyncio
+
+async def main() -&gt; None:
+    queue: asyncio.Queue[str] = asyncio.Queue(maxsize=2)
+
+    async def worker() -&gt; None:
+        while True:
+            try:
+                item = await queue.get()
+            except asyncio.QueueShutDown:
+                return
+            try:
+                await asyncio.sleep(0)  # stand in for async I/O
+                print(item)
+            finally:
+                queue.task_done()
+
+    async with asyncio.TaskGroup() as group:
+        for _ in range(2):
+            group.create_task(worker())
+        for item in ["a", "b", "c"]:
+            await queue.put(item)
+        queue.shutdown()
+        await queue.join()
+
+asyncio.run(main())</code></pre>
+  <p>Use a timeout around the operation you are prepared to abandon, and catch <code>TimeoutError</code> outside the block. The timeout does not magically undo side effects: design handlers to be safe to retry and close resources in <code>finally</code>. A running thread needs its own cooperative stop signal.</p>
+  <pre><code class="language-python">import asyncio
+
+async def main() -&gt; None:
+    try:
+        async with asyncio.timeout(0.01):
+            await asyncio.sleep(1)
+    except TimeoutError:
+        print("timed out")
+
+asyncio.run(main())</code></pre>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="asyncprod-1"><p class="task-text">Write <code>bounded_map</code>: run async work with a concurrency limit, preserve input order, and cancel siblings on failure.</p>
+      <details><summary>Hint</summary><p>Wrap each call with <code>async with semaphore</code> and create the tasks in a <code>TaskGroup</code>.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">import asyncio
+from collections.abc import Awaitable, Callable
+
+async def bounded_map(items: list[int], limit: int,
+                      work: Callable[[int], Awaitable[int]]) -&gt; list[int]:
+    if limit &lt; 1:
+        raise ValueError("limit must be at least one")
+    semaphore = asyncio.Semaphore(limit)
+    async def run_one(item: int) -&gt; int:
+        async with semaphore:
+            return await work(item)
+    async with asyncio.TaskGroup() as group:
+        tasks = [group.create_task(run_one(item)) for item in items]
+    return [task.result() for task in tasks]</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="asyncprod-2"><p class="task-text">Write a bounded queue worker pool that handles every item, shuts down cleanly, and cancels other workers when a handler fails.</p>
+      <details><summary>Hint</summary><p>Start workers inside a <code>TaskGroup</code>; shut down the queue after putting the items and await <code>join()</code>.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">import asyncio
+from collections.abc import Awaitable, Callable
+
+async def run_workers(items: list[str], worker_count: int,
+                      handle: Callable[[str], Awaitable[None]]) -&gt; None:
+    if worker_count &lt; 1:
+        raise ValueError("worker_count must be at least one")
+    queue: asyncio.Queue[str] = asyncio.Queue(maxsize=worker_count)
+    async def worker() -&gt; None:
+        while True:
+            try:
+                item = await queue.get()
+            except asyncio.QueueShutDown:
+                return
+            try:
+                await handle(item)
+            finally:
+                queue.task_done()
+    async with asyncio.TaskGroup() as group:
+        for _ in range(worker_count):
+            group.create_task(worker())
+        for item in items:
+            await queue.put(item)
+        queue.shutdown()
+        await queue.join()</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="asyncprod-3" data-manual><p class="task-text">A timeout expires while awaiting a blocking function in <code>to_thread</code>. What happens to the coroutine and the thread?</p>
+      <details><summary>Hint</summary><p>Can Python safely terminate an already running thread?</p></details>
+      <details><summary>Solution</summary><p>The waiting task is cancelled and the timeout raises <code>TimeoutError</code> outside its block. The thread keeps running. Give the blocking function a cooperative stop signal, such as a <code>threading.Event</code>, if it must stop early.</p></details>
       <label class="done"><input type="checkbox"> Done</label></li>
   </ol>
 </template>
