@@ -3114,6 +3114,87 @@ def root_cause(exc):
 </template>
 
 <!-- ================= SECTION 6 ================= -->
+<template class="lesson" data-n="profiling" data-section="6" data-title="Profiling and performance" data-summary="Find hot functions with cProfile or py-spy, then compare small changes with timeit.">
+  <p class="lead">Python and TypeScript both reward measuring before optimizing. Python has built-in profiling and timing tools, while external samplers can inspect a running process.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">const pieces = ["Ada", " ", "Lovelace"];
+const result = pieces.join("");
+console.log(result);  // Ada Lovelace</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">pieces = ["Ada", " ", "Lovelace"]
+result = "".join(pieces)
+print(result)  # Ada Lovelace</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li><code>cProfile</code> records function calls and timings. Run <code>python -m cProfile -o program.prof script.py</code>, then view the file with <code>snakeviz program.prof</code> or inspect it with <code>pstats</code>.</li>
+    <li><code>py-spy</code> samples another Python process; <code>py-spy record -o profile.svg -- python script.py</code> writes a flame graph. Attaching to an existing process can require operating-system permissions.</li>
+    <li><code>timeit</code> repeats a small operation for comparison. Give both versions the same representative input, check their outputs, and repeat the measurement.</li>
+    <li>Collect strings and use <code>"".join(parts)</code>. Repeated <code>+=</code> creates strings; CPython optimizes some cases, so measure rather than assuming a fixed speedup.</li>
+    <li>Removing the first item of a list shifts the remaining items. For a FIFO queue use <code>collections.deque</code> and <code>popleft()</code> instead of <code>list.pop(0)</code>.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth">
+      <thead><tr><th>Question</th><th>Tool</th><th>Output</th></tr></thead>
+      <tbody>
+        <tr><td>Which functions cost time?</td><td><code>cProfile</code> + snakeviz</td><td>Call counts and timings</td></tr>
+        <tr><td>What is a running process doing?</td><td><code>py-spy</code></td><td>Sampled stacks or a flame graph</td></tr>
+        <tr><td>Which small operation is faster?</td><td><code>timeit</code></td><td>Repeated timings</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>Profile the real workload first; microbenchmarks help compare a specific change afterwards.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p>A list used like a JavaScript queue with repeated <code>pop(0)</code> pays for shifting its remaining elements. <code>deque.popleft()</code> is designed for efficient removal from the front.</p></aside>
+  <h2>Measure before changing a loop</h2>
+  <p>This runnable profile prints the busiest functions by cumulative time. The exact timings depend on your machine, so look for where time goes rather than copying the numbers. For a larger script, save a profile file and use snakeviz to explore the call tree.</p>
+  <pre><code class="language-python">import cProfile
+import io
+import pstats
+
+def build_text() -&gt; str:
+    return "".join(str(n) for n in range(1000))
+
+profile = cProfile.Profile()
+profile.runcall(build_text)
+output = io.StringIO()
+pstats.Stats(profile, stream=output).sort_stats("cumulative").print_stats(5)
+print(output.getvalue())</code></pre>
+  <p><code>tottime</code> excludes calls made by a function; <code>cumtime</code> includes them. A high cumulative time can mean a function merely coordinates slow children, so follow the call tree before changing it.</p>
+  <p>Then compare just the candidate operation. This times repeated joins; use the same data and repetition count for the alternative. Profilers add overhead and a microbenchmark is not a substitute for measuring the real program.</p>
+  <pre><code class="language-python">import timeit
+
+parts = ["small", " ", "pieces"] * 100
+seconds = timeit.timeit(lambda: "".join(parts), number=1000)
+print(f"{seconds:.4f} seconds")</code></pre>
+  <p>Snakeviz and py-spy are optional tools: install them in a scratch project or run them with <code>uvx</code>. Python 3.15 also includes a sampling profiler in its <code>profiling</code> package.</p>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="profiling-1"><p class="task-text">Join an iterable of string fragments in order without repeated concatenation.</p>
+      <details><summary>Hint</summary><p>Call <code>join</code> on the separator, not on the iterable.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from collections.abc import Iterable
+
+def join_fragments(parts: Iterable[str]) -&gt; str:
+    return "".join(parts)</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="profiling-2"><p class="task-text">Drain an iterable of integers in FIFO order using a deque, leaving the original input unchanged.</p>
+      <details><summary>Hint</summary><p>Build a <code>deque</code> and remove from its left side.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from collections import deque
+from collections.abc import Iterable
+
+def drain_queue(items: Iterable[int]) -&gt; list[int]:
+    queue = deque(items)
+    result: list[int] = []
+    while queue:
+        result.append(queue.popleft())
+    return result</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="profiling-3" data-manual><p class="task-text">Choose a tool to find a slow function in a whole script, then explain how you would compare two candidate implementations.</p>
+      <details><summary>Hint</summary><p>Whole-program profiling and microbenchmarking answer different questions.</p></details>
+      <details><summary>Solution</summary><p>Start with cProfile and snakeviz, or sample with py-spy. Once you know the hot spot, compare equivalent implementations with timeit and representative input.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
 <template class="lesson" data-n="25" data-section="7" data-title="Comprehensions and lambdas" data-summary="The Python way to map, filter and build collections in one readable line.">
   <p class="lead">Where TypeScript chains <code>.filter().map()</code>, Python writes a comprehension: one expression that loops, filters and builds a list, dict or set.</p>
   <div class="compare">
