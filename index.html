@@ -4504,6 +4504,110 @@ with Session(engine) as session:
 </template>
 
 <!-- ================= SECTION 8 ================= -->
+<template class="lesson" data-n="postgres" data-section="10" data-title="Postgres for real" data-summary="Async sessions, connection pools, JSONB, migrations and request transactions.">
+  <p class="lead">Postgres work looks familiar if you have used <code>pg.Pool</code>, Prisma or Drizzle. Python offers drivers and SQLAlchemy, but you still own connection lifetimes, transactions and migration review.</p>
+  <div class="compare">
+    <div class="pane ts"><div class="pane-head">TypeScript</div><pre><code class="language-typescript">const region = "north";
+const sql = "SELECT id FROM users WHERE profile-&gt;&gt;'region' = $1";
+const params = [region];
+console.log(sql, params);
+// With pg: await pool.query(sql, params)</code></pre></div>
+    <div class="pane py"><div class="pane-head">Python</div><pre><code class="language-python">from sqlalchemy import text
+
+region = "north"
+statement = text("SELECT id FROM users WHERE profile-&gt;&gt;'region' = :region")
+params = {"region": region}
+print(statement, params)
+# With AsyncSession: await session.execute(statement, params)</code></pre></div>
+  </div>
+  <h2>What’s different</h2>
+  <ul class="points">
+    <li><code>psycopg</code> 3 has sync and async APIs; <code>asyncpg</code> is another async driver. A pool reuses connections like <code>pg.Pool</code>. Close it at application shutdown and choose pool sizes that fit the database.</li>
+    <li>SQLAlchemy’s async engine already manages a connection pool. Create an <code>AsyncSession</code> per request or concurrent task; do not share one session across simultaneous tasks or add another pool without a reason.</li>
+    <li>Use bound parameters, not string interpolation. Postgres <code>JSONB</code> supports containment and indexed fields; SQLAlchemy’s PostgreSQL dialect exposes these operations in expressions.</li>
+    <li>Alembic compares model metadata with a database and generates a <em>candidate</em> migration. Review it: a rename may appear as a drop and an add, and data changes need explicit care.</li>
+    <li>A transaction commits on normal exit and rolls back on an exception. In FastAPI, function-scoped yield dependencies finish before the response is sent, so a failed commit is not reported as success.</li>
+  </ul>
+  <h2>See it</h2>
+  <figure class="figure"><div class="figure-scroll">
+    <table class="truth">
+      <thead><tr><th>Request</th><th>Success</th><th>Failure</th></tr></thead>
+      <tbody>
+        <tr><td>Open a session and transaction</td><td>Run the route</td><td>Raise an exception</td></tr>
+        <tr><td>Exit the transaction</td><td>Commit before response</td><td>Roll back and report the error</td></tr>
+        <tr><td>Exit the session</td><td>Return connection to pool</td><td>Return or discard the connection</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>One request owns its session; the engine owns the pool shared by requests.</figcaption>
+  </figure>
+  <aside class="trap"><strong>TS trap</strong><p>A route returning a value does not mean its transaction has committed. If cleanup commits after a response is sent, a failed commit can look successful. Choose a transaction boundary that finishes before sending the response.</p></aside>
+  <h2>Commit the request before responding</h2>
+  <p>This creates the engine without connecting immediately. The route connects only when called, so the example can be read without a running database. Replace the URL with configuration for a real deployment; do not put credentials in source code.</p>
+  <pre><code class="language-python">from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from typing import Annotated
+from fastapi import Depends, FastAPI
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+engine = create_async_engine("postgresql+psycopg://localhost/course")
+sessions = async_sessionmaker(engine, expire_on_commit=False)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -&gt; AsyncIterator[None]:
+    yield
+    await engine.dispose()
+
+app = FastAPI(lifespan=lifespan)
+
+async def get_session() -&gt; AsyncIterator[AsyncSession]:
+    async with sessions() as session:
+        async with session.begin():
+            yield session
+
+@app.get("/db-check")
+async def db_check(
+    session: Annotated[AsyncSession, Depends(get_session, scope="function")],
+) -&gt; dict[str, int]:
+    result = await session.execute(text("SELECT 1"))
+    return {"value": result.scalar_one()}</code></pre>
+  <p>Install <code>sqlalchemy[asyncio]</code> and a driver such as <code>psycopg[binary]</code>. For direct psycopg pooling use <code>psycopg[pool]</code>; for SQLAlchemy with asyncpg install <code>asyncpg</code> and use <code>postgresql+asyncpg://</code>. A function-scoped session cannot be used later by a streaming response.</p>
+  <p>For schema changes, set Alembic’s <code>target_metadata</code>, run <code>alembic revision --autogenerate -m "change"</code>, inspect and edit the migration, then apply it with <code>alembic upgrade head</code>. Test the migration against a disposable database before deployment.</p>
+  <h2>Practice</h2>
+  <ol class="tasks">
+    <li class="task" data-task="postgres-1"><p class="task-text">Build a parameterized SQLAlchemy query for active users in a JSONB region. Compile it for Postgres without connecting.</p>
+      <details><summary>Hint</summary><p>Use JSONB <code>contains</code> and the region field’s <code>as_string()</code>.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from sqlalchemy import Column, Integer, MetaData, Table, select
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.sql import Select
+
+users = Table("users", MetaData(), Column("id", Integer, primary_key=True),
+              Column("profile", JSONB, nullable=False))
+
+def active_users_in_region(region: str) -&gt; Select[tuple[int]]:
+    return select(users.c.id).where(
+        users.c.profile.contains({"active": True}),
+        users.c.profile["region"].as_string() == region,
+    )</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="postgres-2"><p class="task-text">Run an async operation inside a session transaction. Return its result and let errors propagate so the context can roll back.</p>
+      <details><summary>Hint</summary><p>Use <code>async with session.begin()</code>; tests use a fake session, not a server.</p></details>
+      <details><summary>Solution</summary><pre><code class="language-python">from collections.abc import Awaitable, Callable
+from sqlalchemy.ext.asyncio import AsyncSession
+
+async def in_transaction[T](
+    session: AsyncSession, operation: Callable[[AsyncSession], Awaitable[T]],
+) -&gt; T:
+    async with session.begin():
+        return await operation(session)</code></pre></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+    <li class="task" data-task="postgres-3" data-manual><p class="task-text">An autogenerated migration drops one column and adds another. What could it miss, and why should a request commit before responding?</p>
+      <details><summary>Hint</summary><p>Consider a renamed column containing existing data.</p></details>
+      <details><summary>Solution</summary><p>A rename can look like a destructive drop and add. Review data, constraints, indexes and downgrade behavior; commit before the response so commit failures reach the client.</p></details>
+      <label class="done"><input type="checkbox"> Done</label></li>
+  </ol>
+</template>
+
 <template class="lesson" data-n="35" data-section="10" data-title="Choosing a web framework" data-summary="FastAPI, Django and Flask next to Express and NestJS, and how to pick one.">
   <p class="lead">Python has three big web frameworks, and each one matches something you know from Node. FastAPI is the typed, API-first one, Django brings everything from the ORM to an admin site, and Flask is as small as Express.</p>
   <div class="compare">

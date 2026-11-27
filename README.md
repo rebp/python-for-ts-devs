@@ -4,7 +4,7 @@ A hands-on Python course for people who already write TypeScript. Each lesson
 puts TypeScript and Python side by side, explains only what's different, and
 ends with three exercises that check themselves.
 
-- **48 lessons, 144 exercises.** 119 are checked by tests; 25 (predict the
+- **49 lessons, 147 exercises.** 121 are checked by tests; 26 (predict the
   output, REPL experiments, tooling setup, open-ended projects) are short
   READMEs you check yourself.
 - **One command** shows the next exercise, runs its tests and remembers your
