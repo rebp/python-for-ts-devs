@@ -63,7 +63,11 @@ Then open a new terminal so the `uv` command is found. Homebrew
    (try `8.1`, `keyword-only` or `enum members`). On smaller screens,
    tap the menu icon to open **Lessons** and find the search box. Use the
    sun or moon icon to switch themes. You can swipe sideways inside wide
-   diagrams and code examples.
+   diagrams and code examples. Most Python examples have **Run** and
+   **Edit** buttons: they run in your browser with
+   [Pyodide](https://pyodide.org/), which is one Python version behind the
+   course. The others have a **Copy** button and the command to run them
+   on your computer. The exercises always run on your computer.
 
 4. Start the exercises:
 
@@ -238,6 +242,29 @@ uv run course.py --verify
 in `exercises/` and pass on its solution, and every README exercise must have
 an answer in `solutions/`. Run it on a fresh copy, since solved exercises in
 `exercises/` count as "not failing".
+
+Every Python example in `index.html` carries one of these attributes, and
+`uv run pytest tests` fails if one is missing:
+
+| Attribute | Meaning | Checked by `pytest tests` |
+| --- | --- | --- |
+| `data-run` | Runs in the browser | exits cleanly and prints something |
+| `data-run="async"` | Same, with a note about the browser's event loop | same |
+| `data-run="files"` | Same, with a note that files live in browser memory | same |
+| `data-run="error"` | Raises on purpose; the traceback is the point | fails with an error |
+| `data-static="reason"` | Can't run in the browser; shows how to run it locally | reason is known |
+
+Reasons: `network`, `server`, `threads`, `tests`, `debugger`, `course-code`,
+`unsupported-library`, `terminal`, `excerpt`. The browser runs Pyodide
+(Python 3.14) and loads pydantic, lxml, numpy, pandas, polars and SQLAlchemy
+on demand. It has no threads, network, servers, pytest or hypothesis.
+
+After adding examples or upgrading Pyodide, run every runnable example in a
+real browser (needs Chrome or `uvx playwright install chromium`):
+
+```bash
+uv run scripts/check_in_browser.py
+```
 
 The same checks run automatically on Linux, macOS and Windows on every push
 (`.github/workflows/ci.yml`). If one of them fails, the course is broken for

@@ -16,3 +16,10 @@ htmlcov/
 # Files the exercises create when you run them
 *.db
 scratch/
+
+# AI assistant files
+CLAUDE.md
+AGENTS.md
+.claude/
+.agents/
+skills-lock.json
